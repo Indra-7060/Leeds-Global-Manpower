@@ -29,7 +29,7 @@ export async function loadState(ws: Workspace): Promise<State> {
 
   const m = (x: Rec) => x;
   return {
-    clients: clients.map(c => m({ id: c.id, name: c.name, sector: c.sector, stage: c.stage, next_action: c.nextAction })),
+    clients: clients.map(c => m({ id: c.id, name: c.name, sector: c.sector, stage: c.stage, segment: c.segment, next_action: c.nextAction })),
     visits: visits.map(v => m({ id: v.id, client: v.client.name, contact: v.contact, date: dateToISO(v.date), outcome: v.outcome, pipeline_stage: v.pipelineStage, next_action: v.nextAction, salesperson: v.salesperson, notes: v.notes })),
     demands: demands.map(d => m({ id: d.code, dbId: d.id, client: d.client.name, order_id: d.order?.code ?? '', letter_date: dateToISO(d.letterDate), countries: d.countries, trades: d.trades, quantities: d.quantities,
       nationality: d.nationality, salary_benefits: d.salaryBenefits, signed: d.signed, agency_allocation: d.agencyAllocation, status: d.status })),

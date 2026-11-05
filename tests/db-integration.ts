@@ -111,7 +111,7 @@ async function main() {
   check('warranty advances along its workflow', (await R2.advanceStatus(staff, 'warranties', wlRow.id)).ok && (await prisma.warrantyCase.findUnique({ where: { id: wlRow.id } }))!.status === 'Under Review');
 
   // domestic cases + workflow end
-  const dc = await R2.saveDomestic(staff, { origin: 'Kenya', customer: tag, status: 'Guarantee / Complaints' });
+  const dc = await R2.saveDomestic(staff, { origin: 'Kenya', customer: tag, category: 'Cook', status: 'Guarantee / Complaints' });
   const dcRow = (await prisma.domesticCase.findFirst({ where: { workspace: ws, customer: tag } }))!;
   check('domestic case gets a DW-nnn code', dc.ok && /^DW-\d{3}$/.test(dcRow.code), dcRow.code);
   check('cannot advance past the last workflow step', bad(await R2.advanceStatus(staff, 'domestic', dcRow.id)));
@@ -211,7 +211,7 @@ async function main() {
   check('a LIVE record can be written', (await MUT.saveClient(live2, { name: 'DBTEST Live Client', stage: 'Prospect' })).ok);
   check('MD can clear the LIVE workspace; DEMO is untouched', (await R3.clearWorkspace(live2)).ok && (await prisma.client.count({ where: { workspace: 'live' } })) === 0 && (await prisma.candidate.count({ where: { workspace: ws } })) > 0);
   check('reset demo is refused outside the DEMO workspace', bad(await R3.resetDemo(live2)));
-  check('MD can reset the DEMO workspace to the original sample (also removes all test rows)', (await R3.resetDemo(md)).ok && (await prisma.candidate.count({ where: { workspace: ws } })) === 40 && (await prisma.client.count({ where: { workspace: ws } })) === 5);
+  check('MD can reset the DEMO workspace to the original sample (also removes all test rows)', (await R3.resetDemo(md)).ok && (await prisma.candidate.count({ where: { workspace: ws } })) === 40 && (await prisma.client.count({ where: { workspace: ws } })) === 6);
   await prisma.activityLog.deleteMany({ where: { workspace: 'live' } }); await prisma.counter.deleteMany({ where: { workspace: 'live' } });
 
   await prisma.activityLog.deleteMany({ where: { workspace: ws, text: { contains: 'DB Test Person' } } });

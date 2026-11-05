@@ -25,7 +25,7 @@ export const CORPORATE_PAGES: NavItem[] = [
 ];
 
 export const MANAGEMENT: NavItem[] = [
-  { slug: 'tasks', label: 'Tasks & Alerts', icon: '◷', built: true }, { slug: 'contracts', label: 'Contract Library', icon: '▣', built: true, perm: 'contracts.view' },
+  { slug: 'tasks', label: 'Tasks & Alerts', icon: '◷', built: true }, { slug: 'automations', label: 'Automations', icon: '⚙', built: true }, { slug: 'contracts', label: 'Contract Library', icon: '▣', built: true, perm: 'contracts.view' },
   { slug: 'visa-master', label: 'Master Recruitment Report', icon: '▦', built: true }, { slug: 'reports', label: 'Reports & Alerts', icon: '▦', built: true },
   { slug: 'import-center', label: 'Excel Import Center', icon: '⇧', built: true }, { slug: 'cv-inbox', label: 'CV Intake Center', icon: '✉', built: true },
   { slug: 'ai-reports', label: 'AI Reports & Exports', icon: '✦', built: true }, { slug: 'vault', label: 'Credentials Register', icon: '⚿', built: true },

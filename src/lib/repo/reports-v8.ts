@@ -15,7 +15,7 @@ const W = (a: Actor) => ({ workspace: a.workspace });
 
 export const V8_REPORTS: Record<string, Def> = {
   'Contract Expiry': { permission: 'contracts.view', build: async a => {
-    const t = todayISO(), cs = await prisma.contract.findMany({ where: W(a), include: { client: true, domesticCase: true, versions: true }, orderBy: [{ expiryDate: 'asc' }, { code: 'asc' }] });
+    const t = todayISO(), cs = await prisma.contract.findMany({ where: { ...W(a), archivedAt: null }, include: { client: true, domesticCase: true, versions: true }, orderBy: [{ expiryDate: 'asc' }, { code: 'asc' }] });
     return { columns: col(['code', 'Contract'], ['division', 'Division'], ['owner', 'Company / Sponsor'], ['title', 'Title'], ['type', 'Agreement type'], ['signed', 'Signed'], ['expiry', 'Expiry'], ['alert', 'Alert'], ['days', 'Days left'], ['files', 'Files']),
       rows: cs.map(c => { const e = dateToISO(c.expiryDate); return { code: c.code, division: c.division, owner: c.client?.name ?? c.domesticCase?.customer ?? '', client: c.client?.name ?? '', title: c.title, type: c.agreementType, signed: dateToISO(c.signedDate), expiry: e, alert: V.expiryBand(e, t) || (e ? 'OK' : 'No expiry'), days: e ? diffDays(t, e) : '', files: c.versions.length }; }) };
   } },

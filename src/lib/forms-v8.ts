@@ -8,6 +8,10 @@ const lookup = (key: string, label: string, name: string, o: Partial<Field> = {}
 const optionKeys = (m: Record<string, string>) => ({ options: Object.keys(m), labels: m });
 
 export const v8Specs: Record<string, Spec> = {
+  agencyRecords: { label: 'Overseas agency', fields: [
+    { key: 'name', label: 'Agency name', type: 'text', required: true }, { key: 'country', label: 'Country', type: 'text', suggest: 'countries' },
+    { key: 'contact', label: 'Contact person', type: 'text' }, { key: 'phone', label: 'Phone', type: 'text' }, { key: 'email', label: 'E-mail', type: 'text' }, { key: 'notes', label: 'Notes', type: 'text', full: true },
+  ] },
   domAccount: { label: 'Sponsor fee agreement', fields: [
     lookup('case_id', 'Sponsor case', 'domesticCases', { required: true }),
     { key: 'agreed_fee', label: 'Agreed recruitment fee (QAR)', type: 'number', required: true, min: 0 },
@@ -31,8 +35,8 @@ export const v8Specs: Record<string, Spec> = {
     { key: 'gov_fees', label: 'Government fees (QAR)', type: 'number', min: 0, help: 'Leave blank to use the fee agreement.' },
   ] },
   vacancies: { label: 'Vacancy', fields: [
-    lookup('client', 'Company / client', 'clients', { required: true }), { key: 'title', label: 'Job title / vacancy', type: 'text', required: true },
-    sel('category', 'Job category', C.v8.jobCategories), { key: 'quantity', label: 'Number of vacancies', type: 'int', required: true, min: 1, default: 1 },
+    lookup('client', 'Company', 'corporateClients', { required: true, help: 'Only Corporate companies are listed. Add one with “+ New Company” on this screen.' }), { key: 'title', label: 'Job title / vacancy', type: 'text', required: true },
+    { key: 'category', label: 'Job category', type: 'text', suggest: 'jobCategories', help: 'Pick from the list or type a new one (Settings → Editable lists).' }, { key: 'quantity', label: 'Number of vacancies', type: 'int', required: true, min: 1, default: 1 },
     sel('source', 'Candidate source', C.v8.vacancySources, { required: true, default: 'Local Qatar' }), sel('status', 'Status', C.v8.vacancyStatuses, { required: true, default: 'Open' }),
     { key: 'notes', label: 'Notes', type: 'text', full: true },
   ] },
@@ -60,7 +64,7 @@ export const v8Specs: Record<string, Spec> = {
     { key: 'reference', label: 'Reference', type: 'text' }, { key: 'note', label: 'Remarks', type: 'text' },
   ] },
   serviceTerms: { label: 'Service-charge agreement', fields: [
-    lookup('client', 'Client', 'clients', { required: true }), lookup('order_id', 'Order (optional — blank = all orders of the client)', 'orders'),
+    lookup('client', 'Client', 'labourClients', { required: true }), lookup('order_id', 'Order (optional — blank = all orders of the client)', 'orders'),
     yn('enabled', 'Client pays a service charge?', 'No', { help: 'No charge unless the signed agreement enables it.' }),
     sel('currency', 'Currency', C.v8.serviceCurrencies, { required: true, default: 'USD' }),
     { type: 'select', key: 'basis', label: 'Charge basis', required: true, default: 'worker', ...optionKeys(C.v8.serviceBasis) },
@@ -83,7 +87,7 @@ export const v8Specs: Record<string, Spec> = {
   ] },
   contracts: { label: 'Contract', fields: [
     { type: 'select', key: 'division', label: 'Division', required: true, default: 'labour', options: C.v8.contractDivisions.map(d => d[0]), labels: Object.fromEntries(C.v8.contractDivisions) },
-    lookup('client', 'Company (Blue-Collar / Corporate)', 'clients', { help: 'Filed under the company folder.' }),
+    lookup('client', 'Company (Blue-Collar / Corporate)', 'allClients', { help: 'Filed under the company folder.' }),
     lookup('case_id', 'Individual sponsor (Domestic)', 'domesticCases', { help: 'Domestic contracts are filed by sponsor, never by company.' }),
     { key: 'title', label: 'Title', type: 'text', required: true }, sel('agreement_type', 'Agreement type', C.v8.agreementTypes, { required: true, default: 'Manpower supply agreement' }),
     { key: 'signed_date', label: 'Signed date', type: 'date' }, { key: 'effective_date', label: 'Effective date', type: 'date' }, { key: 'expiry_date', label: 'Expiry date', type: 'date', help: 'Alerts at 90 / 30 / 7 days.' },

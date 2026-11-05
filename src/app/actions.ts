@@ -6,11 +6,12 @@ import * as R from '@/lib/repo/mutations';
 import * as R2 from '@/lib/repo/mutations-more';
 import * as R3 from '@/lib/repo/mutations-3';
 import * as R4 from '@/lib/repo/mutations-v8';
+import * as R5 from '@/lib/repo/mutations-v8b';
 import type { Errors } from '@/lib/forms';
 
 export interface FormState { ok?: boolean; errors?: Errors; message?: string; values?: Record<string, string>; nonce?: number }
 export type Entity = 'clients' | 'orders' | 'candidates' | 'visits' | 'demands' | 'allocations' | 'interviews' | 'tickets' | 'warranties' | 'domestic' | 'finance' | 'credentials'
-  | 'domAccount' | 'domPayments' | 'refunds' | 'vacancies' | 'placements' | 'placementFees' | 'placePayments' | 'serviceTerms' | 'serviceInvoices' | 'servicePayments' | 'fundAllocations' | 'contracts' | 'tasks' | 'interviewEntries';
+  | 'domAccount' | 'domPayments' | 'refunds' | 'vacancies' | 'placements' | 'placementFees' | 'placePayments' | 'serviceTerms' | 'serviceInvoices' | 'servicePayments' | 'fundAllocations' | 'contracts' | 'tasks' | 'interviewEntries' | 'agencyRecords';
 type Simple = 'visits' | 'demands' | 'allocations' | 'interviews' | 'tickets' | 'warranties' | 'domestic';
 
 const refresh = () => revalidatePath('/', 'layout');
@@ -26,7 +27,7 @@ export async function saveEntity(entity: Entity, id: number | null, _prev: FormS
     interviews: R2.saveInterview, tickets: R2.saveTicket, warranties: R2.saveWarranty, domestic: R2.saveDomestic, finance: R3.saveFinance, credentials: R3.saveCredential,
     domAccount: R4.saveDomAccount, domPayments: R4.saveDomPayment, refunds: R4.saveRefund, vacancies: R4.saveVacancy, placements: R4.savePlacement, placementFees: R4.savePlacementFee,
     placePayments: R4.savePlacementPayment, serviceTerms: R4.saveServiceTerm, serviceInvoices: R4.saveServiceInvoice, servicePayments: R4.saveServicePayment, fundAllocations: R4.saveFundAllocation,
-    contracts: R4.saveContract, tasks: R4.saveTask, interviewEntries: R4.saveInterviewEntry }[entity];
+    contracts: R4.saveContract, tasks: R4.saveTask, interviewEntries: R4.saveInterviewEntry, agencyRecords: R5.saveAgency }[entity];
   if (!fn) return { ok: false, errors: { _: 'Unknown record type.' } };
   const res = await fn(actor, input, id ?? undefined);
   if (res.ok && entity === 'candidates' && input._cv) await R3.setCvStatus(actor, Number(input._cv), 'Candidate created'); // created from a CV intake item
@@ -37,7 +38,7 @@ export async function saveEntity(entity: Entity, id: number | null, _prev: FormS
 export async function deleteEntity(entity: Entity, id: number): Promise<FormState> {
   const { user, ws } = await requireUser();
   const actor: R.Actor = { workspace: ws, role: user.role, userId: user.userId };
-  const res = R4.isV8Deletable(entity) ? await R4.deleteV8(actor, entity, id) : entity === 'clients' ? await R.deleteClient(actor, id) : entity === 'orders' ? await R.deleteOrder(actor, id) : entity === 'candidates' ? await R.deleteCandidate(actor, id)
+  const res = entity === 'agencyRecords' ? await R5.deleteAgency(actor, id) : R4.isV8Deletable(entity) ? await R4.deleteV8(actor, entity, id) : entity === 'clients' ? await R.deleteClient(actor, id) : entity === 'orders' ? await R.deleteOrder(actor, id) : entity === 'candidates' ? await R.deleteCandidate(actor, id)
     : entity === 'finance' ? await R3.deleteFinance(actor, id) : entity === 'credentials' ? await R3.deleteCredential(actor, id) : await R2.deleteSimple(actor, entity as Simple, id);
   if (res.ok) refresh();
   return toState(res, 'Deleted');
@@ -122,4 +123,14 @@ export async function decideAllocationAction(id: number, decision: 'Approved' | 
 }
 export async function setTaskStatusAction(id: number, status: 'Open' | 'Done'): Promise<FormState> {
   const res = await R4.setTaskStatus(await actorOf(), id, status); if (res.ok) refresh(); return toState(res, status === 'Done' ? 'Task completed' : 'Task reopened');
+}
+
+export async function archiveContractAction(id: number, archived: boolean): Promise<FormState> {
+  const res = await R5.setContractArchived(await actorOf(), id, archived); if (res.ok) refresh(); return toState(res, archived ? 'Contract archived (files kept)' : 'Contract restored');
+}
+export async function addListItemAction(kind: string, value: string): Promise<FormState> {
+  const res = await R5.addListItem(await actorOf(), kind, value); if (res.ok) refresh(); return toState(res, 'Added');
+}
+export async function deleteListItemAction(id: number): Promise<FormState> {
+  const res = await R5.deleteListItem(await actorOf(), id); if (res.ok) refresh(); return toState(res, 'Removed');
 }

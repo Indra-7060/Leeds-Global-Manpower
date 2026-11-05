@@ -7,18 +7,20 @@ import WorkspaceSwitch from '@/components/WorkspaceSwitch';
 import { ToastProvider } from '@/components/Toaster';
 import ReportsToolbar from '@/components/ReportsToolbar';
 import { prisma } from '@/lib/db';
+import { AutoRefresh } from '@/components/V8Controls';
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const { user, ws } = await requireUser();
   const [cl, co1, co2] = await Promise.all([prisma.client.findMany({ where: { workspace: ws }, select: { name: true }, orderBy: { name: 'asc' } }),
     prisma.candidate.findMany({ where: { workspace: ws }, select: { country: true }, distinct: ['country'] }), prisma.order.findMany({ where: { workspace: ws }, select: { country: true }, distinct: ['country'] })]);
   const countries = [...new Set([...co1, ...co2].map(x => x.country))].sort();
+  const perms = ['finance.view', 'contracts.view'].filter(p => can(user.role, p));
   return (
     <ToastProvider>
       <div className="shell">
         <aside>
           <div className="brand"><div className="logo">◎</div><div><strong>LEADS GLOBAL</strong><small>MANPOWER · ERP</small></div></div>
-          <Sidebar perms={['finance.view', 'contracts.view'].filter(p => can(user.role, p))} />
+          <Sidebar perms={perms} />
           <div className="foot" style={{ padding: 15 }}>Next.js build<br />{ws === 'demo' ? 'Sample data' : 'Working records'} · MySQL</div>
         </aside>
         <main>
@@ -33,7 +35,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           <div className={`banner ${ws === 'demo' ? 'demo' : 'live'}`}>
             {ws === 'demo' ? 'DEMO WORKSPACE — fictional sample data only. Not business data.' : 'LIVE WORKSPACE — real business records. Changes are saved to the database and logged.'}
           </div>
-          <div className="content"><ReportsToolbar clients={cl.map(c => c.name)} countries={countries} />{children}</div>
+          <div className="content"><ReportsToolbar clients={cl.map(c => c.name)} countries={countries} perms={perms} /><AutoRefresh />{children}</div>
         </main>
       </div>
     </ToastProvider>

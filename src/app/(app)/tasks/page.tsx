@@ -23,7 +23,7 @@ export default async function TasksPage() {
   const s = await loadState(ws);
   const rem: { when: string; what: string; owner: string; level: string }[] = computeAlerts(s).map(a => ({ when: 'Now', what: `${a.action} (${a.count})`, owner: a.assigned, level: 'Pending' }));
   if (can(user.role, 'contracts.view')) {
-    for (const c of await prisma.contract.findMany({ where: { workspace: ws, expiryDate: { not: null } }, include: { client: true, domesticCase: true } })) {
+    for (const c of await prisma.contract.findMany({ where: { workspace: ws, expiryDate: { not: null }, archivedAt: null }, include: { client: true, domesticCase: true } })) {
       const band = V.expiryBand(dateToISO(c.expiryDate), today); if (band) rem.push({ when: dateToISO(c.expiryDate), what: `Contract ${c.code} (${c.client?.name ?? c.domesticCase?.customer}) — ${band.toLowerCase()}`, owner: 'Document controller', level: band });
     }
   }

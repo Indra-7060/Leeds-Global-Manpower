@@ -36,7 +36,7 @@ export async function saveClient(a: Actor, input: Record<string, unknown>, id?: 
   return prisma.$transaction(async tx => {
     const dup = await tx.client.findUnique({ where: { workspace_nameKey: { workspace: a.workspace, nameKey } } });
     if (dup && dup.id !== id) return fail({ name: 'A client with this name already exists.' });
-    const data = { name: clean.name, nameKey, sector: clean.sector, stage: clean.stage, nextAction: clean.next_action };
+    const data = { name: clean.name, nameKey, sector: clean.sector, stage: clean.stage, segment: clean.segment || 'Blue-Collar', nextAction: clean.next_action };
     if (id) {
       const before = await tx.client.findFirst({ where: { id, workspace: a.workspace } });
       if (!before) return fail({ _: 'Client not found.' });
@@ -54,8 +54,9 @@ export async function deleteClient(a: Actor, id: number): Promise<Result> {
   return prisma.$transaction(async tx => {
     const c = await tx.client.findFirst({ where: { id, workspace: a.workspace } });
     if (!c) return fail({ _: 'Client not found.' });
-    const [o, cand, v, dl] = await Promise.all([tx.order.count({ where: { clientId: id } }), tx.candidate.count({ where: { clientId: id } }), tx.visit.count({ where: { clientId: id } }), tx.demandLetter.count({ where: { clientId: id } })]);
-    const refs = [[o, 'order(s)'], [cand, 'candidate(s)'], [v, 'visit(s)'], [dl, 'demand letter(s)']].filter(x => x[0] as number);
+    const [o, cand, v, dl, vac, con, svc] = await Promise.all([tx.order.count({ where: { clientId: id } }), tx.candidate.count({ where: { clientId: id } }), tx.visit.count({ where: { clientId: id } }), tx.demandLetter.count({ where: { clientId: id } }),
+      tx.corporateVacancy.count({ where: { clientId: id } }), tx.contract.count({ where: { clientId: id } }), tx.serviceFeeTerm.count({ where: { clientId: id } })]);
+    const refs = [[o, 'order(s)'], [cand, 'candidate(s)'], [v, 'visit(s)'], [dl, 'demand letter(s)'], [vac, 'vacancy(ies)'], [con, 'contract(s)'], [svc, 'service-charge agreement(s)']].filter(x => x[0] as number);
     if (refs.length) return fail({ _: 'Client is used by ' + refs.map(x => `${x[0]} ${x[1]}`).join(', ') + '. Remove or reassign those first.' });
     await tx.client.delete({ where: { id } });
     await log(tx, a, 'clients', '', c.name, `Client ${c.name} deleted`);
@@ -73,6 +74,7 @@ export async function saveOrder(a: Actor, input: Record<string, unknown>, id?: n
   return prisma.$transaction(async tx => {
     const client = await findClient(tx, a.workspace, clean.client);
     if (!client) return fail({ client: 'Client not found — add it under Client CRM first.' });
+    if (client.segment === 'Corporate') return fail({ client: 'This company is a Corporate-division client. Orders are for Blue-Collar clients — set its division to “Both” if it also hires blue-collar workers.' });
     const data = { clientId: client.id, country: canonicalCountry(clean.country), trade: clean.trade, qty: clean.qty as number, status: clean.status, agency: clean.agency };
     if (id) {
       const o = await tx.order.findFirst({ where: { id, workspace: a.workspace } });

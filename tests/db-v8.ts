@@ -163,6 +163,28 @@ async function main() {
   const ie = await R.saveInterviewEntry(staff, { interview_id: String(iv.id), candidate_id: String(own1.id), attended: 'Yes', decision: 'Selected' });
   check('attendance + decision recorded; duplicates refused', ie.ok && no(await R.saveInterviewEntry(staff, { interview_id: String(iv.id), candidate_id: String(own1.id), attended: 'Yes', decision: 'Rejected' })), J(ie));
 
+  // ───────── 9. Divisions for companies, agency register, contract archive, editable lists ─────────
+  console.log('\n— division, agencies, archive, lists —');
+  const R5 = await import('../src/lib/repo/mutations-v8b'); const MUT = await import('../src/lib/repo/mutations');
+  const corp = (await prisma.client.findFirst({ where: { workspace: ws, name: 'Demo Finance Advisors' } }))!;
+  check('a Corporate-only company is NOT a valid client for a blue-collar order', no(await MUT.saveOrder(staff, { client: corp.name, country: 'Nepal', trade: 'Cleaner', qty: '5', status: 'New Order' })));
+  check('a Blue-Collar-only company cannot get a corporate vacancy', no(await R.saveVacancy(staff, { client: 'Demo Facilities Co.', title: 'x', quantity: '1', source: 'Local Qatar', status: 'Open' })));
+  check('a Corporate-only company cannot get a service-charge agreement', no(await R.saveServiceTerm(md, { client: corp.name, enabled: 'No', currency: 'USD', basis: 'worker', amount: '1', trigger: 'Verified arrival', taxable: 'No' })));
+  check('a new corporate company can be created and gets a vacancy', (await MUT.saveClient(staff, { name: 'TEST Corp Co', stage: 'Prospect', segment: 'Corporate' })).ok && (await R.saveVacancy(staff, { client: 'TEST Corp Co', title: 'T', quantity: '1', source: 'Local Qatar', status: 'Open' })).ok);
+  check('a company with a vacancy cannot be deleted (clear message, no database error)', no(await MUT.deleteClient(md, (await prisma.client.findFirst({ where: { workspace: ws, name: 'TEST Corp Co' } }))!.id)));
+  check('a free-text category is accepted for a vacancy and a sponsor (lists are editable)', (await R.saveVacancy(staff, { client: 'TEST Corp Co', title: 'T2', category: 'Quantity Surveyor', quantity: '1', source: 'Local Qatar', status: 'Open' })).ok);
+  const ag = await R5.saveAgency(staff, { name: 'TEST Agency', country: 'Nepal', contact: 'x' });
+  check('staff can register an overseas agency; duplicate names are refused', ag.ok && no(await R5.saveAgency(staff, { name: ' test agency ' })));
+  check('an agency that is used by an allocation cannot be removed', no(await R5.deleteAgency(staff, (await prisma.agency.findFirst({ where: { workspace: ws, name: 'Demo Dhaka Agency' } }))!.id)));
+  check('an unused agency can be removed', (await R5.deleteAgency(staff, (await prisma.agency.findFirst({ where: { workspace: ws, name: 'TEST Agency' } }))!.id)).ok);
+  const ctr = (await prisma.contract.findFirst({ where: { workspace: ws, code: 'CT-1001' } }))!;
+  check('STAFF cannot archive a contract', no(await R5.setContractArchived(staff, ctr.id, true)));
+  const expiry = async () => (await (await import('../src/lib/repo/reports-v8')).V8_REPORTS['Contract Expiry'].build(md)).rows.map(r => r.code);
+  check('archiving hides the contract from the expiry alerts but keeps the row', (await R5.setContractArchived(ni, ctr.id, true)).ok && !(await expiry()).includes('CT-1001') && !!(await prisma.contract.findUnique({ where: { id: ctr.id } })));
+  check('restoring brings it back', (await R5.setContractArchived(ni, ctr.id, false)).ok && (await expiry()).includes('CT-1001'));
+  check('STAFF cannot edit the lists; standard and duplicate choices are refused', no(await R5.addListItem(staff, 'jobCategory', 'Pilot')) && no(await R5.addListItem(md, 'jobCategory', 'engineer')) && no(await R5.addListItem(md, 'nope', 'x')));
+  check('MD adds a custom category and removes it again', (await R5.addListItem(md, 'domesticCategory', 'Tutor')).ok && no(await R5.addListItem(md, 'domesticCategory', 'tutor')) && (await R5.deleteListItem(md, (await prisma.listItem.findFirst({ where: { workspace: ws, value: 'Tutor' } }))!.id)).ok);
+
   // every V8 report listed in the UI exists and runs
   const { V8_REPORTS } = await import('../src/lib/repo/reports-v8'); const { V8_REPORT_NAMES } = await import('../src/lib/quick');
   let reportsOk = true; const bad: string[] = [];

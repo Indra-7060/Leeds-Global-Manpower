@@ -8,18 +8,22 @@ import { addMonths, isoToDate } from '@/lib/util';
 
 const d = (s?: string | null) => isoToDate(s || null);
 
-export async function clearV8Data(tx: Pick<PrismaClient, 'interviewEntry' | 'financeAllocation' | 'receivablePayment' | 'serviceFeeInvoice' | 'serviceFeeTerm' | 'contractVersion' | 'contract' | 'refundClaim' | 'domesticAccount' | 'placementFee' | 'corporatePlacement' | 'corporateVacancy' | 'task'>, where: { workspace: string }) {
+export async function clearV8Data(tx: Pick<PrismaClient, 'agency' | 'listItem' | 'interviewEntry' | 'financeAllocation' | 'receivablePayment' | 'serviceFeeInvoice' | 'serviceFeeTerm' | 'contractVersion' | 'contract' | 'refundClaim' | 'domesticAccount' | 'placementFee' | 'corporatePlacement' | 'corporateVacancy' | 'task'>, where: { workspace: string }) {
   await tx.interviewEntry.deleteMany({ where }); await tx.financeAllocation.deleteMany({ where }); await tx.receivablePayment.deleteMany({ where });
   await tx.serviceFeeInvoice.deleteMany({ where }); await tx.serviceFeeTerm.deleteMany({ where });
   await tx.contractVersion.deleteMany({ where }); await tx.contract.deleteMany({ where });
   await tx.refundClaim.deleteMany({ where }); await tx.domesticAccount.deleteMany({ where });
   await tx.placementFee.deleteMany({ where }); await tx.corporatePlacement.deleteMany({ where }); await tx.corporateVacancy.deleteMany({ where });
-  await tx.task.deleteMany({ where });
+  await tx.task.deleteMany({ where }); await tx.agency.deleteMany({ where }); await tx.listItem.deleteMany({ where });
 }
 
 export async function seedV8Demo(prisma: PrismaClient, ids: { client: Map<string, number>; order: Map<string, number>; cand: Map<string, number> }) {
   const ws = 'demo';
   const cl = (n: string) => ids.client.get(n)!;
+  for (const n of ['Demo Construction Ltd', 'Demo Hospitality Group']) await prisma.client.update({ where: { id: cl(n) }, data: { segment: 'Both' } });
+  await prisma.client.create({ data: { workspace: ws, name: 'Demo Finance Advisors', nameKey: 'demo finance advisors', sector: 'Financial services', stage: 'Prospect', segment: 'Corporate', nextAction: 'Send placement proposal' } });
+  for (const [name, country, contact] of [['Demo Dhaka Agency', 'Bangladesh', 'Demo Contact A'], ['Demo Chattogram Agency', 'Bangladesh', 'Demo Contact B'], ['Demo Kathmandu Agency', 'Nepal', 'Demo Contact C']] as const)
+    await prisma.agency.create({ data: { workspace: ws, name, nameKey: name.toLowerCase(), country, contact, phone: '+000 000 0000' } });
   // ── domestic sponsors (individuals) ──
   const dom = new Map((await prisma.domesticCase.findMany({ where: { workspace: ws } })).map(x => [x.code, x]));
   const profile: [string, string, string, string, string | null, string | null][] = [

@@ -148,3 +148,17 @@ Legend: **Built** = works and is covered by an automated test · **Partly** = wo
 * Money lives only in tables read through code that checks `finance.view`; pages for staff never query them.
 * New environment values (optional in development): `DATA_KEY` (base64, 32 bytes — encrypts QIDs and files; falls back to a key derived from `SESSION_SECRET`), `STORAGE_DIR` (default `./storage`, git-ignored).
 * Tests: `npm test` (56 unit tests incl. business rules and the XLSX writer), `npm run test:db` (V6 rules against MySQL), `npm run test:v8` (V8 rules against MySQL — about 75 checks), plus browser checks as MD and as Operations Staff.
+
+## 6. Follow-up fixes after the side-by-side review with the client's file
+
+| Gap found | Fix |
+|---|---|
+| Corporate companies had to be added under Client CRM and then appeared in the Blue-Collar client list | Every company now has a **Division** (Blue-Collar / Corporate / Both). Corporate Recruitment has its own **Corporate Companies** list with “+ New Company”. Corporate-only companies are hidden from Client CRM and from blue-collar forms; blue-collar orders and service charges refuse them, corporate vacancies refuse Blue-Collar-only companies (checked on the server). |
+| Contracts could not be removed | **Archive / Restore** (Managing Director and Admin Manager). Archived contracts leave the active list, alerts and the expiry report; nothing is deleted and every file stays downloadable under “Archived”. |
+| Overseas agencies existed only as typed names | **Agency Register** (name, country, contact, phone, e-mail). Allocations may still use any name; a registered agency cannot be deleted while allocations, candidates or orders use it. |
+| Domestic worker categories and corporate job categories could only be changed in the code | **Settings → Editable lists**: add your own choices (and remove them again); standard choices stay. The forms accept the list as suggestions or free text. |
+| No “Automations & Integrations” screen | New **Automations** screen listing what works, what is partly done, and what needs an outside service (e-mail, WhatsApp, virus scan, backups, MFA). |
+| Screens only changed when you pressed refresh | Open screens re-read the data about once a minute (paused while a form is open). |
+| Finance report buttons were shown to Operations Staff (the server already refused the download) | Hidden for users who may not download them. |
+
+New migration `20261107000000_v8_segments_agencies` (additive): `clients.segment`, `contracts.archivedAt`, tables `agencies` and `list_items`. Demo data gains one Corporate-only company, two “Both” companies and three registered agencies.

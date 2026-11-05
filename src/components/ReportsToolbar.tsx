@@ -10,13 +10,14 @@ import { useToast } from './Toaster';
 const HIDDEN = ['/', '/import-center', '/cv-inbox', '/vault', '/finance', '/settings', '/visa-master', '/reports', '/ai-reports'];
 
 /** V6's "📊 Reports & Excel" bar: filters + quick-report chips that download CSV straight from the current section. */
-export default function ReportsToolbar({ clients, countries }: { clients: string[]; countries: string[] }) {
+const MONEY = ['Domestic Balances', 'Domestic Collections', 'Refund Claims', 'Placement Fees', 'Service Charges', 'Agency Deposits', 'Receipts Ledger', 'Private Finance'];
+export default function ReportsToolbar({ clients, countries, perms }: { clients: string[]; countries: string[]; perms: string[] }) {
   const path = usePathname(); const toast = useToast();
   const [f, setF] = useState({ client: 'All', country: 'All', stage: 'All' });
   const page = path.split('/').filter(Boolean)[0] ?? '';
   if (HIDDEN.includes(path) || path.startsWith('/soon') || path.startsWith('/api')) return null;
   const qs = (name: string) => `/api/export?report=${encodeURIComponent(name)}&client=${encodeURIComponent(f.client)}&country=${encodeURIComponent(f.country)}&stage=${encodeURIComponent(f.stage)}`;
-  const quick = quickReports(page);
+  const quick = quickReports(page).filter(n => (!MONEY.includes(n) || perms.includes('finance.view')) && (n !== 'Contract Expiry' || perms.includes('contracts.view')));
   const sel = (k: 'client' | 'country', label: string, vals: string[]) => (
     <select aria-label={label} value={f[k]} onChange={e => setF(p => ({ ...p, [k]: e.target.value }))}><option value="All">All {label}</option>{vals.map(v => <option key={v}>{v}</option>)}</select>
   );

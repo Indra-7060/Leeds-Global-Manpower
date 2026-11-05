@@ -27,7 +27,8 @@ const country = (o: Partial<Field> = {}): Field => ({ key: 'country', label: 'Co
 export const specs: Record<string, Spec> = {
   clients: { label: 'Client', fields: [
     { key: 'name', label: 'Client name', type: 'text', required: true }, { key: 'sector', label: 'Sector', type: 'text' },
-    { key: 'stage', label: 'Stage', type: 'select', options: C.clientStages, required: true, default: 'Prospect' }, { key: 'next_action', label: 'Next action', type: 'text' },
+    { key: 'stage', label: 'Stage', type: 'select', options: C.clientStages, required: true, default: 'Prospect' },
+    { key: 'segment', label: 'Division', type: 'select', options: C.clientSegments, required: true, default: 'Blue-Collar', help: 'Corporate = local/overseas placement client. Choose Both if the company uses both services.' }, { key: 'next_action', label: 'Next action', type: 'text' },
   ] },
   orders: { label: 'Order', fields: [
     { key: 'client', label: 'Client', type: 'lookup', lookup: 'clients', required: true },
@@ -125,7 +126,7 @@ Object.assign(specs, {
     { key: 'customer', label: 'Sponsor full name', type: 'text', required: true },
     { key: 'qid', label: 'QID / sponsor reference', type: 'text', help: 'Stored encrypted; only the last characters are ever shown. On edit, leave blank to keep the saved value.' },
     { key: 'mobile', label: 'Mobile', type: 'text' }, { key: 'address', label: 'Address', type: 'text', full: true },
-    sel('category', 'Worker category', C.v8.domesticCategories, { required: true, default: 'Housemaid' }),
+    { key: 'category', label: 'Worker category', type: 'text', required: true, suggest: 'domesticCategories', placeholder: 'e.g. Housemaid', help: 'Pick from the list or type a new one. The list is managed in Settings → Editable lists.' },
     { key: 'origin', label: 'Worker nationality', type: 'text', required: true, placeholder: 'e.g. Philippines', suggest: 'countries' },
     sel('status', 'Status', C.domesticStatuses, { required: true, default: 'Customer Enquiry' }), { key: 'next_action', label: 'Next action', type: 'text' },
     { key: 'arrival_date', label: 'Arrival date', type: 'date' },

@@ -10,12 +10,14 @@ import { DeleteButton } from '@/components/RowButtons';
 
 export default async function ClientsPage() {
   const { ws } = await requireUser();
-  const s = await loadState(ws);
+  const all = await loadState(ws);
+  const s = { ...all, clients: all.clients.filter(c => c.segment !== 'Corporate') }; // Corporate-only companies live under Corporate Recruitment
+  const corporateOnly = all.clients.length - s.clients.length;
   const m = M.crm(s);
   const lookups = { clients: s.clients.map(c => ({ value: c.name, label: c.name })), countries: C.countries.map(x => ({ value: x, label: x })) };
   const rows: TableRow[] = s.clients.map(c => ({
-    key: String(c.id), search: `${c.name} ${c.sector} ${c.next_action}`, filters: { stage: c.stage, sector: c.sector },
-    cells: [c.name, c.sector, <Badge key="b" text={c.stage} />, c.next_action, s.orders.filter(o => norm(o.client) === norm(c.name)).length],
+    key: String(c.id), search: `${c.name} ${c.sector} ${c.next_action}`, filters: { stage: c.stage, sector: c.sector, segment: c.segment },
+    cells: [c.name, c.sector, c.segment === 'Both' ? 'Blue-Collar + Corporate' : 'Blue-Collar', <Badge key="b" text={c.stage} />, c.next_action, s.orders.filter(o => norm(o.client) === norm(c.name)).length],
     actions: <>
       <EntityForm entity="orders" label="+ Order" cls="secondary small" values={{ client: c.name }} lookups={lookups} title={`New order for ${c.name}`} />
       <EntityForm entity="clients" id={c.id} label="Edit" cls="secondary small" values={c} lookups={lookups} />
@@ -27,11 +29,11 @@ export default async function ClientsPage() {
       <Heading title="Client CRM" desc="Market visits → company introduction → enquiry → client order" />
       <Cards><Metric label="Clients" value={m.clients} sub="Registered" /><Metric label="Visits" value={m.visits} sub="Recorded" /><Metric label="Follow-ups" value={m.followUps} sub="Pending" /><Metric label="Orders Won" value={m.ordersWon} sub="Open" /></Cards>
       <Panel title="Client Register" actions={<EntityForm entity="clients" label="+ Add Client" lookups={lookups} />}>
-        <DataTable columns={['Client', 'Sector', 'Stage', 'Next Action', 'Orders']} rows={rows}
+        <DataTable columns={['Client', 'Sector', 'Division', 'Stage', 'Next Action', 'Orders']} rows={rows}
           filters={[{ key: 'stage', label: 'Stages', values: [...C.clientStages] }, { key: 'sector', label: 'Sectors', values: uniqSorted(s.clients.map(c => c.sector)) }]}
           empty="No clients yet. Add your first client." />
       </Panel>
-      <Muted>Renaming a client updates every order and candidate automatically (they are linked by record, not by typed name). A client that is used by orders or candidates cannot be deleted.</Muted>
+      <Muted>{corporateOnly > 0 ? `${corporateOnly} Corporate-only compan${corporateOnly > 1 ? 'ies are' : 'y is'} managed under Corporate Recruitment and not listed here. ` : ''}Renaming a client updates every order and candidate automatically (they are linked by record, not by typed name). A client that is used by orders or candidates cannot be deleted.</Muted>
     </>
   );
 }

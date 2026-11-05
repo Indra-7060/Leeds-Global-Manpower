@@ -1,6 +1,6 @@
 'use client';
-import { useRef, useState, useTransition } from 'react';
-import { decideAllocationAction, decideRefundAction, setTaskStatusAction } from '@/app/actions';
+import { useEffect, useRef, useState, useTransition } from 'react';
+import { addListItemAction, archiveContractAction, decideAllocationAction, decideRefundAction, deleteListItemAction, setTaskStatusAction } from '@/app/actions';
 import { refundEstimate } from '@/lib/domain/v8';
 import { C } from '@/lib/config';
 import { money } from '@/lib/util';
@@ -90,4 +90,35 @@ export function RefundCalc() {
       <p className="muted">{r.note}</p>
     </div>
   );
+}
+
+/** Archive / restore a contract. Archiving hides it from alerts; the files and all versions are kept. */
+export function ArchiveButton({ id, archived }: { id: number; archived: boolean }) {
+  const [pending, start] = useTransition(); const toast = useToast();
+  const run = () => start(async () => { const r = await archiveContractAction(id, !archived); toast(r.ok ? (r.message ?? 'Done') : (r.errors?._ ?? 'Not allowed'), r.ok ? 'ok' : 'err'); });
+  return <button className="btn ghost small" type="button" disabled={pending} onClick={run} title={archived ? 'Show again in the active list and alerts' : 'Hide from the active list and alerts (nothing is deleted)'}>{archived ? 'Restore' : 'Archive'}</button>;
+}
+
+/** Add / remove extra choices for a list that was fixed in the config file. Standard choices cannot be removed. */
+export function ListEditor({ kind, label, base, items }: { kind: string; label: string; base: readonly string[]; items: { id: number; value: string }[] }) {
+  const [text, setText] = useState(''); const [pending, start] = useTransition(); const toast = useToast();
+  const add = () => start(async () => { const r = await addListItemAction(kind, text); toast(r.ok ? 'Added' : (r.errors?._ ?? 'Could not add'), r.ok ? 'ok' : 'err'); if (r.ok) setText(''); });
+  const del = (id: number) => start(async () => { const r = await deleteListItemAction(id); toast(r.ok ? 'Removed' : (r.errors?._ ?? 'Could not remove'), r.ok ? 'ok' : 'err'); });
+  return (
+    <div style={{ marginBottom: 18 }}>
+      <strong>{label}</strong>
+      <div className="flow" style={{ margin: '8px 0' }}>{base.map(b => <span key={b}>{b}</span>)}{items.map(i => <span key={i.id} style={{ background: '#e6f7ef' }}>{i.value} <button type="button" className="btn ghost small" aria-label={`Remove ${i.value}`} disabled={pending} onClick={() => del(i.id)} style={{ padding: '0 6px' }}>×</button></span>)}</div>
+      <div className="row"><input className="input" style={{ maxWidth: 280 }} placeholder="New choice…" aria-label={`New ${label}`} value={text} onChange={e => setText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') add(); }} /><button className="btn small" type="button" disabled={pending || !text.trim()} onClick={add}>+ Add</button></div>
+    </div>
+  );
+}
+
+/** Quietly re-reads the page data every minute so numbers other people changed appear without pressing refresh. Paused while a form is open. */
+export function AutoRefresh({ seconds = 60 }: { seconds?: number }) {
+  const router = useRouter();
+  useEffect(() => {
+    const id = setInterval(() => { if (document.visibilityState === 'visible' && !document.querySelector('[role=dialog]')) router.refresh(); }, seconds * 1000);
+    return () => clearInterval(id);
+  }, [router, seconds]);
+  return null;
 }

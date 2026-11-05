@@ -2,6 +2,7 @@ import 'server-only';
 import { prisma } from '@/lib/db';
 import { C, can, type RoleId, type Workspace } from '@/lib/config';
 import * as V from '@/lib/domain/v8';
+import { norm } from '@/lib/util';
 import { dateToISO } from '@/lib/util';
 import type { Lookups } from '@/components/EntityForm';
 
@@ -10,7 +11,7 @@ const num = (x: unknown) => Number(x ?? 0);
 /** Option lists for the V8 forms. Money-related lists are only returned to users who may see finance. */
 export async function v8Lookups(ws: Workspace, role: RoleId): Promise<Lookups> {
   const where = { workspace: ws }, fin = can(role, 'finance.view');
-  const [cases, vacancies, placements, fees, terms, invoices, deposits, orders, cands, interviews, users, clients] = await Promise.all([
+  const [cases, vacancies, placements, fees, terms, invoices, deposits, orders, cands, interviews, users, clients, listItems, agencyReg, agencyAlloc, agencyCand] = await Promise.all([
     prisma.domesticCase.findMany({ where, orderBy: { code: 'asc' } }),
     prisma.corporateVacancy.findMany({ where, include: { client: true }, orderBy: { code: 'asc' } }),
     prisma.corporatePlacement.findMany({ where, orderBy: { code: 'asc' } }),
@@ -23,10 +24,19 @@ export async function v8Lookups(ws: Workspace, role: RoleId): Promise<Lookups> {
     prisma.interview.findMany({ where, include: { client: true }, orderBy: { id: 'asc' } }),
     prisma.user.findMany({ where: { active: true }, orderBy: { name: 'asc' } }),
     prisma.client.findMany({ where, orderBy: { name: 'asc' } }),
+    prisma.listItem.findMany({ where, orderBy: { value: 'asc' } }),
+    prisma.agency.findMany({ where, select: { name: true } }), prisma.agencyAllocation.findMany({ where, select: { agency: true }, distinct: ['agency'] }), prisma.candidate.findMany({ where, select: { agency: true }, distinct: ['agency'] }),
   ]);
+  const union = (base: readonly string[], extra: string[]) => { const seen = new Set<string>(); return [...base, ...extra].filter(x => x && !seen.has(norm(x)) && seen.add(norm(x))); };
+  const nameOf = (c: { name: string }) => c.name;
   const o = (value: string | number, label: string) => ({ value: String(value), label });
   return {
-    clients: clients.map(c => o(c.name, c.name)),
+    allClients: clients.map(c => o(c.name, c.name)),
+    corporateClients: clients.filter(c => c.segment !== 'Blue-Collar').map(c => o(nameOf(c), `${c.name}${c.segment === 'Both' ? ' (also Blue-Collar)' : ''}`)),
+    labourClients: clients.filter(c => c.segment !== 'Corporate').map(c => o(c.name, c.name)),
+    domesticCategories: union(C.v8.domesticCategories, listItems.filter(i => i.kind === 'domesticCategory').map(i => i.value)).map(x => o(x, x)),
+    jobCategories: union(C.v8.jobCategories, listItems.filter(i => i.kind === 'jobCategory').map(i => i.value)).map(x => o(x, x)),
+    agencies: union([], [...agencyReg.map(x => x.name), ...agencyAlloc.map(x => x.agency), ...agencyCand.map(x => x.agency)]).sort((x, y) => x.localeCompare(y)).map(x => o(x, x)),
     countries: C.countries.map(x => o(x, x)),
     domesticCases: cases.map(c => o(c.id, `${c.code} · ${c.customer || '(no name)'}`)),
     vacancies: vacancies.map(v => o(v.id, `${v.code} · ${v.client.name} · ${v.title}`)),

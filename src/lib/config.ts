@@ -34,6 +34,7 @@ export const C = {
     'contracts.view': ['md', 'nitija'],
     'contracts.manage': ['md', 'nitija'],
     'tasks.assign': ['md', 'nitija'],
+    'lists.manage': ['md', 'nitija'],
   } as Record<string, RoleId[]>,
 
   countries: ['Bangladesh', 'Nepal', 'India', 'Philippines', 'Other'],
@@ -80,6 +81,8 @@ export const C = {
   orderClosed: ['Closed'],
 
   clientStages: ['Active', 'Prospect'],
+  /** V8: a company belongs to a division. Corporate companies are kept out of the Blue-Collar client list (and vice versa). */
+  clientSegments: ['Blue-Collar', 'Corporate', 'Both'],
   visitOutcomes: ['Profile Presented', 'Follow-up', 'Order Received'],
   salesPipeline: ['Company Identified', 'Profile Briefing', 'Client Interested', 'Requirement Discussion', 'Demand Received', 'Order Created'],
   demandStatuses: ['Received', 'Under Review', 'Approved'],

@@ -11,7 +11,7 @@ export async function overview(ws: Workspace, role: RoleId, userId: number) {
   const where = { workspace: ws }, today = todayISO(), month = today.slice(0, 7), fin = can(role, 'finance.view'), seeAll = can(role, 'tasks.assign');
   const [tasks, contracts, warranties, joinedMonth, domestic, vacancies, placements] = await Promise.all([
     prisma.task.findMany({ where: { ...where, status: 'Open', ...(seeAll ? {} : { assigneeId: userId }) } }),
-    can(role, 'contracts.view') ? prisma.contract.findMany({ where: { ...where, expiryDate: { not: null } } }) : [],
+    can(role, 'contracts.view') ? prisma.contract.findMany({ where: { ...where, expiryDate: { not: null }, archivedAt: null } }) : [],
     prisma.warrantyCase.count({ where: { ...where, status: { not: 'Closed' } } }),
     prisma.candidateStage.count({ where: { stage: 'Joined', candidate: where, at: { gte: new Date(month + '-01T00:00:00Z') } } }),
     prisma.domesticCase.findMany({ where, include: { account: fin, payments: fin } }),

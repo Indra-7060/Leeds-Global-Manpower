@@ -86,6 +86,7 @@ model Client {
   nameKey    String // normalised name, used for the "client names are unique" rule
   sector     String   @default("")
   stage      String   @default("Prospect") @db.VarChar(20) // Active | Prospect
+  segment    String   @default("Blue-Collar") @db.VarChar(12) // Blue-Collar | Corporate | Both (V8: companies belong to a division)
   nextAction String   @default("")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -608,6 +609,7 @@ model Contract {
   billingTerms   String    @default("") @db.Text
   warrantyTerms  String    @default("") @db.Text
   notes          String    @default("") @db.Text
+  archivedAt     DateTime? // archived contracts are hidden from alerts but never deleted
   createdAt      DateTime  @default(now())
 
   client       Client?           @relation(fields: [clientId], references: [id])
@@ -680,4 +682,33 @@ model InterviewEntry {
 
   @@unique([interviewId, candidateId])
   @@map("interview_entries")
+}
+
+/// Overseas recruitment agencies (register). Allocations and candidates still refer to an agency by name.
+model Agency {
+  id        Int      @id @default(autoincrement())
+  workspace String   @db.VarChar(10)
+  name      String
+  nameKey   String
+  country   String   @default("") @db.VarChar(60)
+  contact   String   @default("")
+  phone     String   @default("") @db.VarChar(40)
+  email     String   @default("")
+  notes     String   @default("")
+  createdAt DateTime @default(now())
+
+  @@unique([workspace, nameKey])
+  @@map("agencies")
+}
+
+/// Extra choices added in the app for lists that were fixed in the config file (domestic worker categories, corporate job categories).
+model ListItem {
+  id        Int      @id @default(autoincrement())
+  workspace String   @db.VarChar(10)
+  kind      String   @db.VarChar(30)
+  value     String   @db.VarChar(80)
+  createdAt DateTime @default(now())
+
+  @@unique([workspace, kind, value])
+  @@map("list_items")
 }

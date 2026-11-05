@@ -101,7 +101,8 @@ export async function decideRefund(a: Actor, id: number, decision: 'Approved' | 
 export async function saveVacancy(a: Actor, input: Record<string, unknown>, id?: number): Promise<Result> {
   const { errors, clean } = bad('vacancies', input, !!id); if (Object.keys(errors).length) return fail(errors);
   return prisma.$transaction(async tx => {
-    const client = await findClient(tx, a.workspace, clean.client); if (!client) return fail({ client: 'Company not found — add it under Client CRM first.' });
+    const client = await findClient(tx, a.workspace, clean.client); if (!client) return fail({ client: 'Company not found — add it with “+ New Company” first.' });
+    if (client.segment === 'Blue-Collar') return fail({ client: 'This company is a Blue-Collar client. Set its division to “Corporate” or “Both” before opening a corporate vacancy.' });
     const data = { clientId: client.id, title: clean.title, category: clean.category, quantity: clean.quantity, source: clean.source, status: clean.status, notes: clean.notes };
     if (id) {
       const x = await tx.corporateVacancy.findFirst({ where: { id, workspace: a.workspace } }); if (!x) return fail({ _: 'Vacancy not found.' });
@@ -177,6 +178,7 @@ export async function saveServiceTerm(a: Actor, input: Record<string, unknown>, 
   const { errors, clean } = bad('serviceTerms', input, !!id); if (Object.keys(errors).length) return fail(errors);
   return prisma.$transaction(async tx => {
     const client = await findClient(tx, a.workspace, clean.client); if (!client) return fail({ client: 'Client not found.' });
+    if (client.segment === 'Corporate') return fail({ client: 'Service charges apply to Blue-Collar clients; this company is Corporate-only.' });
     let orderId: number | null = null;
     if (clean.order_id) {
       const o = await tx.order.findFirst({ where: { workspace: a.workspace, code: clean.order_id } }) ?? await tx.order.findFirst({ where: { workspace: a.workspace, id: idOf(clean.order_id) } });
