@@ -6,6 +6,7 @@ import * as L from '@/lib/domain/lifecycle';
 import * as M from '@/lib/domain/metrics';
 import { candidateKey, warrantyExpiry, looksLikeSecret } from '@/lib/domain/rules';
 import { computeAlerts } from '@/lib/domain/alerts';
+import { V8_REPORT_NAMES } from '@/lib/quick';
 import { keywordReport, quickReports, runReport, defs } from '@/lib/domain/reports';
 import { buildDemoState } from '@/lib/seed-data';
 
@@ -91,7 +92,7 @@ describe('dashboard & report calculations on the demo data (same numbers as the 
 describe('reports', () => {
   it('every report runs; every quick-report chip resolves', () => {
     const s = seed(); for (const n of Object.keys(defs)) { const r = runReport(n, s, {}, 'md'); expect(r.error, n).toBeUndefined(); expect(r.columns.length).toBeGreaterThan(0); }
-    for (const p of ['interviews', 'visas', 'deployment', 'tickets', 'orders', 'candidates', 'agencies', 'warranty', 'domestic', 'demands', 'clients', 'visits', 'visa-master', 'dashboard']) for (const q of quickReports(p)) expect(defs[q], `${p} → ${q}`).toBeTruthy();
+    for (const p of ['interviews', 'visas', 'deployment', 'tickets', 'orders', 'candidates', 'agencies', 'warranty', 'domestic', 'demands', 'clients', 'visits', 'visa-master', 'dashboard', 'corporate', 'contracts', 'tasks', 'servicefees']) for (const q of quickReports(p)) expect(defs[q] || V8_REPORT_NAMES.includes(q), `${p} → ${q}`).toBeTruthy();
   });
   it('stage reports equal dashboard numbers; interview/order reports read the right entity', () => {
     const s = seed();

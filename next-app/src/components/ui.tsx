@@ -2,9 +2,9 @@
 import type { ReactNode } from 'react';
 
 export function badgeClass(s: string): string {
-  if (/rejected|expired/i.test(s)) return 'red';
-  if (/active|arrived|joined|printed|selected|accepted|approved|reviewed|created|issued|^yes$|^done$/i.test(s)) return 'green';
-  if (/pending|review|interview|processing|qvc|rtp|scheduled|follow|booking|sourcing|received|needs/i.test(s)) return 'orange';
+  if (/rejected|expired|overdue|escalate|within 7/i.test(s)) return 'red';
+  if (/active|arrived|joined|printed|selected|accepted|approved|reviewed|created|issued|^yes$|^done$|^paid$|settled|^ok$/i.test(s)) return 'green';
+  if (/pending|review|interview|processing|qvc|rtp|scheduled|follow|booking|sourcing|received|needs|partial|unpaid|due|proposed|awaiting|within (30|90)|expiring|not yet|offer|shortlisted|^open$/i.test(s)) return 'orange';
   return 'grey';
 }
 export const Badge = ({ text }: { text: string }) => <span className={`pill ${badgeClass(text)}`}>{text}</span>;

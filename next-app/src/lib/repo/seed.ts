@@ -7,6 +7,7 @@ import type { Workspace } from '@/lib/config';
 import { buildDemoState } from '@/lib/seed-data';
 import { candidateKey } from '@/lib/domain/rules';
 import { isoToDate, norm } from '@/lib/util';
+import { clearV8Data, seedV8Demo } from './seed-v8';
 
 const d = (s?: string) => isoToDate(s || null);
 
@@ -14,6 +15,7 @@ const d = (s?: string) => isoToDate(s || null);
 export async function clearWorkspaceData(prisma: PrismaClient, ws: Workspace) {
   const where = { workspace: ws };
   await prisma.$transaction(async tx => {
+    await clearV8Data(tx, where); // V8 tables first (they point at clients, orders, candidates, interviews, finance entries, domestic cases)
     await tx.candidateStage.deleteMany({ where: { candidate: where } });
     await tx.travelRecord.deleteMany({ where });
     await tx.warrantyCase.deleteMany({ where });
@@ -61,5 +63,6 @@ export async function seedDemoWorkspace(prisma: PrismaClient) {
   for (const x of s.cvInbox) await prisma.cvIntakeItem.create({ data: { workspace: ws, filename: x.filename, size: x.size, type: x.type, source: x.source, client: x.client, agency: x.agency, country: x.country, status: x.status, note: x.note, extractedEmail: x.extracted_email, extractedPhone: x.extracted_phone, preview: x.preview } });
   for (const a of s.activity) await prisma.activityLog.create({ data: { workspace: ws, at: new Date(a.at), role: a.role, entity: a.entity, client: a.client, text: a.text } });
   for (const [kind, next] of Object.entries(s.counters)) await prisma.counter.create({ data: { workspace: ws, kind, next } });
+  await seedV8Demo(prisma, { client, order, cand });
   return { clients: s.clients.length, orders: s.orders.length, candidates: s.candidates.length };
 }

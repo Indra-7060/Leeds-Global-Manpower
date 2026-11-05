@@ -18,7 +18,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       <div className="shell">
         <aside>
           <div className="brand"><div className="logo">◎</div><div><strong>LEADS GLOBAL</strong><small>MANPOWER · ERP</small></div></div>
-          <Sidebar canFinance={can(user.role, 'finance.view')} />
+          <Sidebar perms={['finance.view', 'contracts.view'].filter(p => can(user.role, p))} />
           <div className="foot" style={{ padding: 15 }}>Next.js build<br />{ws === 'demo' ? 'Sample data' : 'Working records'} · MySQL</div>
         </aside>
         <main>

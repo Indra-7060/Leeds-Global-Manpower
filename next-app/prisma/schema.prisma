@@ -29,6 +29,7 @@ model User {
   createdAt    DateTime @default(now())
 
   activity ActivityLog[]
+  tasks    Task[]
 
   @@map("users")
 }
@@ -82,37 +83,40 @@ model Client {
   id         Int      @id @default(autoincrement())
   workspace  String   @db.VarChar(10)
   name       String
-  nameKey    String   // normalised name, used for the "client names are unique" rule
+  nameKey    String // normalised name, used for the "client names are unique" rule
   sector     String   @default("")
   stage      String   @default("Prospect") @db.VarChar(20) // Active | Prospect
   nextAction String   @default("")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  visits      Visit[]
-  demands     DemandLetter[]
-  orders      Order[]
-  candidates  Candidate[]
-  interviews  Interview[]
-  warranties  WarrantyCase[]
-  credentials CredentialRecord[]
+  visits       Visit[]
+  demands      DemandLetter[]
+  orders       Order[]
+  candidates   Candidate[]
+  interviews   Interview[]
+  warranties   WarrantyCase[]
+  credentials  CredentialRecord[]
+  serviceTerms ServiceFeeTerm[]
+  vacancies    CorporateVacancy[]
+  contracts    Contract[]
 
   @@unique([workspace, nameKey])
   @@map("clients")
 }
 
 model Visit {
-  id            Int       @id @default(autoincrement())
-  workspace     String    @db.VarChar(10)
+  id            Int      @id @default(autoincrement())
+  workspace     String   @db.VarChar(10)
   clientId      Int
-  contact       String    @default("")
-  date          DateTime  @db.Date
-  outcome       String    @db.VarChar(30)
-  pipelineStage String    @default("") @db.VarChar(40)
-  nextAction    String    @default("")
-  salesperson   String    @default("")
-  notes         String    @default("") @db.Text
-  createdAt     DateTime  @default(now())
+  contact       String   @default("")
+  date          DateTime @db.Date
+  outcome       String   @db.VarChar(30)
+  pipelineStage String   @default("") @db.VarChar(40)
+  nextAction    String   @default("")
+  salesperson   String   @default("")
+  notes         String   @default("") @db.Text
+  createdAt     DateTime @default(now())
 
   client Client @relation(fields: [clientId], references: [id])
 
@@ -145,25 +149,28 @@ model DemandLetter {
 }
 
 model Order {
-  id        Int      @id @default(autoincrement())
-  workspace String   @db.VarChar(10)
-  code      String   @db.VarChar(20) // ORD-1001
-  clientId  Int
-  country   String   @db.VarChar(60)
-  trade     String
-  qty       Int
-  status    String   @default("New Order") @db.VarChar(40)
-  agency    String   @default("")
-  importKey String?  // duplicate key used by imports (V6 rule)
+  id         Int      @id @default(autoincrement())
+  workspace  String   @db.VarChar(10)
+  code       String   @db.VarChar(20) // ORD-1001
+  clientId   Int
+  country    String   @db.VarChar(60)
+  trade      String
+  qty        Int
+  status     String   @default("New Order") @db.VarChar(40)
+  agency     String   @default("")
+  importKey  String? // duplicate key used by imports (V6 rule)
   sourceFile String?
   sourceRow  Int?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  client      Client             @relation(fields: [clientId], references: [id])
-  candidates  Candidate[]
-  allocations AgencyAllocation[]
-  demands     DemandLetter[]
+  client        Client              @relation(fields: [clientId], references: [id])
+  candidates    Candidate[]
+  allocations   AgencyAllocation[]
+  demands       DemandLetter[]
+  serviceTerms  ServiceFeeTerm[]
+  contracts     Contract[]
+  allocationsV8 FinanceAllocation[]
 
   @@unique([workspace, code])
   @@index([workspace, importKey])
@@ -194,7 +201,7 @@ model Candidate {
   code       String    @db.VarChar(20) // BD-1001 / NP-1003
   name       String
   passport   String    @default("")
-  dupKey     String    // V6 duplicate key: passport if present, else name+client (unique per workspace)
+  dupKey     String // V6 duplicate key: passport if present, else name+client (unique per workspace)
   clientId   Int
   orderId    Int?
   country    String    @db.VarChar(60)
@@ -209,11 +216,13 @@ model Candidate {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
-  client     Client           @relation(fields: [clientId], references: [id])
-  order      Order?           @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  history    CandidateStage[]
-  travel     TravelRecord?
-  warranties WarrantyCase[]
+  client           Client              @relation(fields: [clientId], references: [id])
+  order            Order?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  history          CandidateStage[]
+  travel           TravelRecord?
+  warranties       WarrantyCase[]
+  interviewEntries InterviewEntry[]
+  allocationsV8    FinanceAllocation[]
 
   @@unique([workspace, code])
   @@unique([workspace, dupKey])
@@ -246,7 +255,8 @@ model Interview {
   status     String    @default("Scheduled") @db.VarChar(20)
   createdAt  DateTime  @default(now())
 
-  client Client @relation(fields: [clientId], references: [id])
+  client  Client           @relation(fields: [clientId], references: [id])
+  entries InterviewEntry[]
 
   @@index([workspace, date])
   @@map("interviews")
@@ -300,6 +310,22 @@ model DomesticCase {
   nextAction String   @default("")
   createdAt  DateTime @default(now())
 
+  // V8: individual sponsor profile (never a company). QID is stored encrypted; only its last characters are kept in clear for masking.
+  sponsorType  String    @default("Qatari Citizen") @db.VarChar(30)
+  qidCipher    String?   @db.Text
+  qidLast      String    @default("") @db.VarChar(6)
+  mobile       String    @default("") @db.VarChar(40)
+  address      String    @default("")
+  category     String    @default("") @db.VarChar(40)
+  arrivalDate  DateTime? @db.Date
+  handoverDate DateTime? @db.Date
+  handoverNote String    @default("")
+
+  account   DomesticAccount?
+  payments  ReceivablePayment[]
+  refunds   RefundClaim[]
+  contracts Contract[]
+
   @@unique([workspace, code])
   @@map("domestic_cases")
 }
@@ -341,6 +367,8 @@ model FinanceEntry {
   sourceRow  Int?
   createdAt  DateTime @default(now())
 
+  allocations FinanceAllocation[]
+
   @@index([workspace, date])
   @@index([workspace, importKey])
   @@map("finance_entries")
@@ -365,4 +393,291 @@ model CvIntakeItem {
 
   @@index([workspace, filename, size])
   @@map("cv_intake_items")
+}
+
+// ───────────────────────── V8: domestic sponsors, corporate placements, service fees ─────────────────────────
+// MONEY TABLES (everything below that holds an amount) are only ever read/written by code that checks the finance permission.
+
+model DomesticAccount {
+  id        Int      @id @default(autoincrement())
+  workspace String   @db.VarChar(10)
+  caseId    Int      @unique
+  agreedFee Decimal  @db.Decimal(14, 2)
+  govFees   Decimal  @default(0) @db.Decimal(14, 2)
+  notes     String   @default("")
+  createdAt DateTime @default(now())
+
+  domesticCase DomesticCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@map("domestic_accounts")
+}
+
+/// One ledger of receipts/payments for the three receivable kinds. Exactly one of the three foreign keys is set.
+model ReceivablePayment {
+  id               Int      @id @default(autoincrement())
+  workspace        String   @db.VarChar(10)
+  direction        String   @default("Incoming") @db.VarChar(10)
+  date             DateTime @db.Date
+  amount           Decimal  @db.Decimal(14, 2)
+  currency         String   @default("QAR") @db.VarChar(3)
+  account          String   @default("") @db.VarChar(20)
+  category         String   @default("") @db.VarChar(30)
+  receiptNo        String   @default("") @db.VarChar(40)
+  reference        String   @default("")
+  note             String   @default("")
+  domesticCaseId   Int?
+  placementFeeId   Int?
+  serviceInvoiceId Int?
+  createdById      Int?
+  createdAt        DateTime @default(now())
+
+  domesticCase   DomesticCase?      @relation(fields: [domesticCaseId], references: [id], onDelete: Cascade)
+  placementFee   PlacementFee?      @relation(fields: [placementFeeId], references: [id], onDelete: Cascade)
+  serviceInvoice ServiceFeeInvoice? @relation(fields: [serviceInvoiceId], references: [id], onDelete: Cascade)
+
+  @@index([workspace, date])
+  @@map("receivable_payments")
+}
+
+/// A refund estimate + decision. Approval only records the decision; nothing is paid out automatically.
+model RefundClaim {
+  id            Int       @id @default(autoincrement())
+  workspace     String    @db.VarChar(10)
+  code          String    @db.VarChar(20)
+  caseId        Int
+  monthsServed  Int
+  reason        String    @db.VarChar(60)
+  evidence      String    @db.Text
+  feePaid       Decimal   @db.Decimal(14, 2)
+  govFees       Decimal   @default(0) @db.Decimal(14, 2)
+  estimate      Decimal?  @db.Decimal(14, 2)
+  ruleVersion   String    @default("") @db.VarChar(80)
+  status        String    @default("Pending review") @db.VarChar(30)
+  requestedById Int?
+  decidedById   Int?
+  decidedAt     DateTime?
+  decisionNote  String    @default("")
+  createdAt     DateTime  @default(now())
+
+  domesticCase DomesticCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@unique([workspace, code])
+  @@map("refund_claims")
+}
+
+model CorporateVacancy {
+  id        Int      @id @default(autoincrement())
+  workspace String   @db.VarChar(10)
+  code      String   @db.VarChar(20) // VC-1001
+  clientId  Int
+  title     String
+  category  String   @default("") @db.VarChar(60)
+  quantity  Int      @default(1)
+  source    String   @default("Local Qatar") @db.VarChar(20)
+  status    String   @default("Open") @db.VarChar(20)
+  notes     String   @default("")
+  createdAt DateTime @default(now())
+
+  client     Client               @relation(fields: [clientId], references: [id])
+  placements CorporatePlacement[]
+
+  @@unique([workspace, code])
+  @@map("corporate_vacancies")
+}
+
+model CorporatePlacement {
+  id            Int       @id @default(autoincrement())
+  workspace     String    @db.VarChar(10)
+  code          String    @db.VarChar(20) // PL-1001
+  vacancyId     Int
+  candidateName String
+  source        String    @default("Local Qatar") @db.VarChar(20)
+  country       String    @default("") @db.VarChar(60)
+  stage         String    @default("Shortlisted") @db.VarChar(20)
+  offerDate     DateTime? @db.Date
+  joiningDate   DateTime? @db.Date // CONFIRMED joining date — the fee clock starts here
+  notes         String    @default("")
+  createdAt     DateTime  @default(now())
+
+  vacancy CorporateVacancy @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  fee     PlacementFee?
+
+  @@unique([workspace, code])
+  @@map("corporate_placements")
+}
+
+model PlacementFee {
+  id           Int       @id @default(autoincrement())
+  workspace    String    @db.VarChar(10)
+  placementId  Int       @unique
+  basicSalary  Decimal   @db.Decimal(14, 2)
+  basis        String    @db.VarChar(10) // half | one | custom
+  feeAmount    Decimal   @db.Decimal(14, 2)
+  dueMonths    Int       @default(1) // 1 or 3 calendar months after confirmed joining
+  invoiceNo    String    @default("") @db.VarChar(40)
+  invoiceDate  DateTime? @db.Date
+  creditNote   Decimal   @default(0) @db.Decimal(14, 2)
+  creditReason String    @default("")
+  note         String    @default("")
+  createdAt    DateTime  @default(now())
+
+  placement CorporatePlacement  @relation(fields: [placementId], references: [id], onDelete: Cascade)
+  payments  ReceivablePayment[]
+
+  @@map("placement_fees")
+}
+
+/// Optional client-paid service charge for blue-collar clients/orders (off unless an agreement enables it).
+model ServiceFeeTerm {
+  id        Int      @id @default(autoincrement())
+  workspace String   @db.VarChar(10)
+  clientId  Int
+  orderId   Int?
+  enabled   Boolean  @default(false)
+  currency  String   @default("USD") @db.VarChar(3)
+  basis     String   @default("worker") @db.VarChar(10) // worker | order
+  amount    Decimal  @db.Decimal(14, 2)
+  trigger   String   @default("Verified arrival") @db.VarChar(30)
+  taxable   Boolean  @default(false)
+  notes     String   @default("")
+  createdAt DateTime @default(now())
+
+  client   Client              @relation(fields: [clientId], references: [id])
+  order    Order?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  invoices ServiceFeeInvoice[]
+
+  @@map("service_fee_terms")
+}
+
+model ServiceFeeInvoice {
+  id        Int      @id @default(autoincrement())
+  workspace String   @db.VarChar(10)
+  code      String   @db.VarChar(20) // SI-1001
+  termId    Int
+  invoiceNo String   @default("") @db.VarChar(40)
+  date      DateTime @db.Date
+  workers   Int      @default(0)
+  amount    Decimal  @db.Decimal(14, 2)
+  note      String   @default("")
+  createdAt DateTime @default(now())
+
+  term     ServiceFeeTerm      @relation(fields: [termId], references: [id], onDelete: Cascade)
+  payments ReceivablePayment[]
+
+  @@unique([workspace, code])
+  @@map("service_fee_invoices")
+}
+
+/// Agency deposits stay UNALLOCATED until the Managing Director approves an explicit allocation.
+model FinanceAllocation {
+  id             Int       @id @default(autoincrement())
+  workspace      String    @db.VarChar(10)
+  financeEntryId Int
+  orderId        Int?
+  candidateId    Int?
+  amount         Decimal   @db.Decimal(14, 2)
+  note           String    @default("")
+  status         String    @default("Proposed") @db.VarChar(20)
+  proposedById   Int?
+  decidedById    Int?
+  decidedAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  entry     FinanceEntry @relation(fields: [financeEntryId], references: [id], onDelete: Cascade)
+  order     Order?       @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  candidate Candidate?   @relation(fields: [candidateId], references: [id], onDelete: SetNull)
+
+  @@map("finance_allocations")
+}
+
+// ───────────────────────── V8: contracts, tasks, interview attendance ─────────────────────────
+
+model Contract {
+  id             Int       @id @default(autoincrement())
+  workspace      String    @db.VarChar(10)
+  code           String    @db.VarChar(20) // CT-1001
+  division       String    @db.VarChar(10) // labour | domestic | corporate
+  clientId       Int? // labour / corporate: filed by company
+  domesticCaseId Int? // domestic: filed by individual sponsor
+  title          String
+  agreementType  String    @default("") @db.VarChar(40)
+  signedDate     DateTime? @db.Date
+  effectiveDate  DateTime? @db.Date
+  expiryDate     DateTime? @db.Date
+  orderId        Int?
+  billingTerms   String    @default("") @db.Text
+  warrantyTerms  String    @default("") @db.Text
+  notes          String    @default("") @db.Text
+  createdAt      DateTime  @default(now())
+
+  client       Client?           @relation(fields: [clientId], references: [id])
+  domesticCase DomesticCase?     @relation(fields: [domesticCaseId], references: [id])
+  order        Order?            @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  versions     ContractVersion[]
+
+  @@unique([workspace, code])
+  @@index([workspace, expiryDate])
+  @@map("contracts")
+}
+
+/// Every upload is a NEW version; originals are never overwritten. The file lives encrypted in the storage folder.
+model ContractVersion {
+  id           Int      @id @default(autoincrement())
+  workspace    String   @db.VarChar(10)
+  contractId   Int
+  version      Int
+  filename     String
+  mime         String   @default("") @db.VarChar(100)
+  size         Int
+  sha256       String   @db.VarChar(64)
+  storageKey   String   @db.VarChar(120)
+  note         String   @default("")
+  uploadedById Int?
+  uploadedAt   DateTime @default(now())
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@unique([contractId, version])
+  @@map("contract_versions")
+}
+
+model Task {
+  id           Int       @id @default(autoincrement())
+  workspace    String    @db.VarChar(10)
+  code         String    @db.VarChar(20) // TK-1001
+  title        String
+  detail       String    @default("") @db.Text
+  kind         String    @default("Manual") @db.VarChar(30)
+  assigneeId   Int?
+  createdById  Int?
+  dueDate      DateTime? @db.Date
+  priority     String    @default("Normal") @db.VarChar(10)
+  status       String    @default("Open") @db.VarChar(10)
+  linkedEntity String    @default("") @db.VarChar(30)
+  linkedCode   String    @default("") @db.VarChar(40)
+  doneAt       DateTime?
+  createdAt    DateTime  @default(now())
+
+  assignee User? @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
+
+  @@unique([workspace, code])
+  @@index([workspace, status, dueDate])
+  @@map("tasks")
+}
+
+model InterviewEntry {
+  id          Int      @id @default(autoincrement())
+  workspace   String   @db.VarChar(10)
+  interviewId Int
+  candidateId Int
+  attended    String   @default("") @db.VarChar(5) // Yes | No | (blank = not recorded)
+  decision    String   @default("Pending") @db.VarChar(10) // Pending | Selected | Rejected
+  note        String   @default("")
+  createdAt   DateTime @default(now())
+
+  interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@unique([interviewId, candidateId])
+  @@map("interview_entries")
 }

@@ -7,7 +7,7 @@ import { quickReports } from '@/lib/quick';
 import { downloadFrom } from './download';
 import { useToast } from './Toaster';
 
-const HIDDEN = ['/', '/import-center', '/cv-inbox', '/vault', '/finance', '/settings', '/corporate', '/visa-master', '/reports', '/ai-reports'];
+const HIDDEN = ['/', '/import-center', '/cv-inbox', '/vault', '/finance', '/settings', '/visa-master', '/reports', '/ai-reports'];
 
 /** V6's "📊 Reports & Excel" bar: filters + quick-report chips that download CSV straight from the current section. */
 export default function ReportsToolbar({ clients, countries }: { clients: string[]; countries: string[] }) {
@@ -24,11 +24,11 @@ export default function ReportsToolbar({ clients, countries }: { clients: string
     <section className="v6-tools">
       <div className="row between"><div><strong>📊 Reports &amp; Excel</strong><div className="muted">Generate a report directly from this section</div></div>
         <div className="row"><Link href="/import-center" className="btn secondary" style={{ padding: '11px 14px' }}>⇧ Import Excel</Link>
-          <button type="button" onClick={() => downloadFrom(qs(quick[0]), toast)}>⇩ Export Report (CSV)</button></div></div>
+          <button type="button" onClick={() => downloadFrom(qs(quick[0]), toast)}>⇩ Export Report (Excel)</button></div></div>
       <div className="v6-filter">{sel('client', 'Clients', clients)}{sel('country', 'Countries', countries)}
         <select aria-label="Stage" value={f.stage} onChange={e => setF(p => ({ ...p, stage: e.target.value }))}>{['All', ...C.stageFilters].map(x => <option key={x}>{x}</option>)}</select></div>
       <div className="v6-reportlinks">{quick.map(x => <button key={x} type="button" onClick={() => downloadFrom(qs(x), toast)}>{x} ↓</button>)}</div>
-      <small>Reports are calculated from the records in the database and download as CSV (opens in Excel). Native XLSX and PDF export are not available yet.</small>
+      <small>Reports are calculated from the records in the database and download as a real Excel (.xlsx) workbook with a Summary and a Detail sheet. PDF export is not available yet.</small>
     </section>
   );
 }

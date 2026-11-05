@@ -28,6 +28,12 @@ export const C = {
     'data.reset': ['md', 'nitija'],
     'users.manage': ['md'],
     'data.backup': ['md', 'nitija'],
+    // V8. All ASSUMPTIONS (V8-Q1…) until the client confirms; the V8 text only fixes finance (MD + Nitija) and MD-approved allocations.
+    'refund.approve': ['md'],
+    'allocation.approve': ['md'],
+    'contracts.view': ['md', 'nitija'],
+    'contracts.manage': ['md', 'nitija'],
+    'tasks.assign': ['md', 'nitija'],
   } as Record<string, RoleId[]>,
 
   countries: ['Bangladesh', 'Nepal', 'India', 'Philippines', 'Other'],
@@ -95,6 +101,48 @@ export const C = {
   financeCategories: ['Agency advance', 'Agency payment', 'Client visa charge', 'QVC charge', 'Visa investment', 'Partner commission',
     'Domestic customer payment', 'Agency expense', 'Refund', 'Office expense', 'Other'],
   costing: { Bangladesh: { client: 2500, revenue: 4000, investment: 300 }, _default: { client: 860, revenue: 1500, investment: 0 } } as Record<string, { client: number; revenue: number; investment: number }>,
+
+  /** ───────── V8 (client developer package). Every figure/rule here is configurable, none is hard-coded in the logic. ───────── */
+  v8: {
+    sponsorTypes: ['Qatari Citizen', 'Eligible Qatar Resident'],
+    domesticCategories: ['Housemaid', 'Cook', 'Family Driver', 'Gardener', 'Nanny', 'Caregiver', 'Housekeeper', 'Other approved category'],
+    domesticPaymentCategories: ['Advance', 'Deployment balance', 'Additional payment', 'Refund paid'],
+    /** Refund rule as described in the V8 package. NOT legally verified — a legal/compliance reviewer must confirm before use (V8 §1). */
+    refundRule: {
+      version: 'MD-21-2021 draft-1', source: 'Client V8 package (Ministerial Decision 21/2021 summary)', effective: 'UNVERIFIED', reviewer: 'PENDING — legal / compliance reviewer',
+      fullRefundMonths: 3, totalMonths: 9, deductionPerMonth: 0.15,
+    },
+    refundReasons: ['Worker refuses work', 'Worker absconds', 'Chronic illness', 'Medical unfitness', 'Recruitment contract breach', 'Other / disputed'],
+    refundNeedsReview: ['Other / disputed'],
+    refundStatuses: ['Pending review', 'Approved', 'Rejected'],
+    vacancySources: ['Local Qatar', 'Overseas', 'Both'],
+    vacancyStatuses: ['Open', 'Filled', 'Closed'],
+    jobCategories: ['Accountant', 'Engineer', 'HR / Admin', 'Sales', 'Manager', 'IT', 'Other'],
+    placementStages: ['Shortlisted', 'Interview', 'Offer', 'Joined', 'Cancelled', 'Replaced'],
+    placementSources: ['Local Qatar', 'Overseas'],
+    feeBasis: { half: 'Half month basic salary (50%)', one: 'One month basic salary (100%)', custom: 'Custom fixed fee' } as Record<string, string>,
+    feeDueMonths: [1, 3],
+    serviceTriggers: ['Order confirmed', 'Visa printed', 'Verified arrival', 'Confirmed joining'],
+    /** Which candidate stages count as "the trigger has happened" for a service charge (ASSUMPTION V8-Q4). */
+    serviceTriggerStages: {
+      'Visa printed': ['Visa Printed', 'Deployment Ready', 'Arrived', 'Joined', 'Warranty'],
+      'Verified arrival': ['Arrived', 'Joined', 'Warranty'],
+      'Confirmed joining': ['Joined', 'Warranty'],
+    } as Record<string, string[]>,
+    serviceCurrencies: ['USD', 'QAR'],
+    serviceBasis: { worker: 'Per deployed worker', order: 'Fixed per order' } as Record<string, string>,
+    contractDivisions: [['labour', 'Blue-Collar'], ['domestic', 'Domestic'], ['corporate', 'Corporate']] as [string, string][],
+    agreementTypes: ['Manpower supply agreement', 'Service fee agreement', 'Sponsor agreement', 'Placement agreement', 'Warranty / replacement terms', 'Amendment', 'Other'],
+    contractAlertDays: [90, 30, 7],
+    uploadExtensions: ['pdf', 'docx', 'doc', 'jpg', 'jpeg', 'png', 'xlsx'],
+    uploadMaxMB: 15,
+    taskKinds: ['Manual', 'QVC', 'Interview', 'Visa / document expiry', 'Ticket / arrival', 'Warranty', 'Receivable follow-up', 'Other'],
+    taskPriorities: ['Normal', 'High'],
+    taskEscalateAfterDays: 3, // an Open task this many days past due is flagged for escalation (ASSUMPTION V8-Q6)
+    interviewDecisions: ['Pending', 'Selected', 'Rejected'],
+    allocationStatuses: ['Proposed', 'Approved', 'Rejected'],
+    allocationCategory: 'Agency advance',
+  },
 
   cvSources: ['Direct upload', 'Email attachment', 'WeTransfer download', 'Overseas agency'],
   cvStatuses: ['Needs review', 'Reviewed', 'Candidate created', 'Ignored'],

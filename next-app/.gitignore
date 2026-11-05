@@ -44,3 +44,6 @@ next-env.d.ts
 
 # keep the template (contains no real secrets)
 !.env.example
+
+# uploaded contract files (encrypted) — never commit
+/storage

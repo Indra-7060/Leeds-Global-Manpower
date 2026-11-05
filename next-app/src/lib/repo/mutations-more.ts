@@ -4,6 +4,7 @@ import { C } from '@/lib/config';
 import { validateInput } from '@/lib/forms';
 import { canonicalCountry, warrantyExpiry } from '@/lib/domain/rules';
 import { norm } from '@/lib/util';
+import { encryptText } from '@/lib/crypto';
 import { d, fail, findClient, log, nextNumber, type Actor, type Result, type Tx } from './mutations';
 
 /** Candidates from Visa Printed onward may have a travel record (V6: tickets are booked once a visa is printed). */
@@ -127,7 +128,10 @@ export async function saveWarranty(a: Actor, input: Record<string, unknown>, id?
 export async function saveDomestic(a: Actor, input: Record<string, unknown>, id?: number): Promise<Result> {
   const { errors, clean } = bad('domestic', input, !!id); if (Object.keys(errors).length) return fail(errors);
   return prisma.$transaction(async tx => {
-    const data = { customer: clean.customer, origin: clean.origin, status: clean.status, nextAction: clean.next_action };
+    const qid = String(clean.qid ?? '').trim(); // blank on edit = keep the stored (encrypted) value
+    const data = { customer: clean.customer, origin: clean.origin, status: clean.status, nextAction: clean.next_action, sponsorType: clean.sponsor_type, mobile: clean.mobile, address: clean.address, category: clean.category,
+      arrivalDate: d(clean.arrival_date), handoverDate: d(clean.handover_date), handoverNote: clean.handover_note, ...(qid ? { qidCipher: encryptText(qid), qidLast: qid.slice(-4) } : {}) };
+    if (clean.arrival_date && clean.handover_date && clean.handover_date < clean.arrival_date) return fail({ handover_date: 'Handover cannot be before arrival.' });
     if (id) {
       const x = await tx.domesticCase.findFirst({ where: { id, workspace: a.workspace } }); if (!x) return fail({ _: 'Case not found.' });
       await tx.domesticCase.update({ where: { id }, data }); await log(tx, a, 'domestic', x.code, '', `Domestic case ${x.code} updated`); return { ok: true, code: x.code } as Result;
@@ -147,6 +151,10 @@ export async function deleteSimple(a: Actor, entity: SimpleEntity, id: number): 
     const model = (tx as any)[MODEL[entity]];
     const row = await model.findFirst({ where: { id, workspace: a.workspace } });
     if (!row) return fail({ _: 'Record not found.' });
+    if (entity === 'domestic') { // never cascade-delete money or contract records from a case delete
+      const [acc, pay, ref, con] = await Promise.all([tx.domesticAccount.count({ where: { caseId: id } }), tx.receivablePayment.count({ where: { domesticCaseId: id } }), tx.refundClaim.count({ where: { caseId: id } }), tx.contract.count({ where: { domesticCaseId: id } })]);
+      if (acc + pay + ref + con) return fail({ _: 'This sponsor case has a fee agreement, payments, refund claims or contracts. Remove those first (finance users only).' });
+    }
     await model.delete({ where: { id } });
     await log(tx, a, entity, row.code ?? '', '', `${entity} record ${row.code ?? '#' + id} deleted`);
     return { ok: true } as Result;

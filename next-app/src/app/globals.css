@@ -114,3 +114,9 @@ nav a .soon{margin-left:auto;font-size:9px;letter-spacing:.5px;text-transform:up
 a.btn{text-decoration:none;display:inline-block}
 .who{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .linkbtn{background:none;border:0;color:#245c86;cursor:pointer;font:inherit;text-decoration:underline;padding:0}
+
+/* ───── V8 ───── */
+.v8grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.v8tile{padding:17px;border:1px solid #dce5ef;border-radius:12px;background:#fff}
+.v8tile h4{margin:0 0 9px}.v8tile p{font-size:13px;color:#60758b;line-height:1.55;margin:0 0 12px}
+.btn.ghost.small{background:transparent;color:#4a6781}

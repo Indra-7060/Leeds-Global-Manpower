@@ -1,18 +1,33 @@
 import { requireUser } from '@/lib/auth/dal';
-import { Heading, Muted, Panel } from '@/components/ui';
-import FeeCalculator from './fee-calculator';
+import { v8Lookups } from '@/lib/repo/lookups-v8';
+import { prisma } from '@/lib/db';
+import { C } from '@/lib/config';
+import { Badge, Cards, Flow, Heading, Metric, Notice, Panel } from '@/components/ui';
+import DataTable, { type TableRow } from '@/components/DataTable';
+import EntityForm from '@/components/EntityForm';
+import { DeleteButton } from '@/components/RowButtons';
 
 export default async function CorporatePage() {
-  await requireUser();
+  const { user, ws } = await requireUser();
+  const lookups = await v8Lookups(ws, user.role);
+  const vacs = await prisma.corporateVacancy.findMany({ where: { workspace: ws }, include: { client: true, placements: true }, orderBy: { code: 'asc' } });
+  const open = vacs.filter(v => v.status === 'Open'), cands = vacs.flatMap(v => v.placements);
+  const rows: TableRow[] = vacs.map(v => ({
+    key: String(v.id), search: `${v.code} ${v.client.name} ${v.title} ${v.category}`, filters: { status: v.status, source: v.source },
+    cells: [v.code, v.client.name, v.title, v.category || '—', v.quantity, v.source, `${v.placements.length} (${v.placements.filter(p => p.stage === 'Joined').length} joined)`, <Badge key="b" text={v.status} />],
+    actions: <><EntityForm entity="vacancies" id={v.id} label="Edit" cls="secondary small" values={{ client: v.client.name, title: v.title, category: v.category, quantity: v.quantity, source: v.source, status: v.status, notes: v.notes }} lookups={lookups} /><DeleteButton entity="vacancies" id={v.id} what={`${v.code} and its candidate placements`} /></>,
+  }));
   return (
     <>
-      <Heading title="Local Corporate Recruitment" desc="Planned division — not yet operational" />
-      <Panel title="Launch Status">
-        <span className="pill grey">Not Started</span>
-        <p>Future workflow: client vacancy → Qatar-local candidate sourcing → shortlist → interview → offer → joining → negotiated placement fee.</p>
-        <Muted>No vacancy or placement records are kept until the division starts and its data model is defined.</Muted>
+      <Heading title="Corporate Recruitment" desc="Company clients — candidates sourced locally in Qatar or overseas" />
+      <Cards><Metric label="Open Vacancies" value={open.length} sub={`${open.reduce((n, v) => n + v.quantity, 0)} positions`} /><Metric label="Candidates" value={cands.length} sub="All stages" />
+        <Metric label="Local / Overseas" value={`${cands.filter(c => c.source === 'Local Qatar').length} / ${cands.filter(c => c.source === 'Overseas').length}`} sub="Candidates by source" /><Metric label="Joined" value={cands.filter(c => c.stage === 'Joined').length} sub="Confirmed joinings" /></Cards>
+      <Panel title="Corporate Workflow"><Flow items={['Company Vacancy', 'Candidate Sourcing', 'Shortlist', 'Interview', 'Offer', 'Confirmed Joining', 'Placement Fee']} /></Panel>
+      <Panel title="Company Vacancies" actions={<EntityForm entity="vacancies" label="+ New Vacancy" lookups={lookups} />}>
+        <DataTable columns={['Vacancy', 'Company', 'Job title', 'Category', 'Positions', 'Source', 'Candidates', 'Status']} rows={rows}
+          filters={[{ key: 'status', label: 'Statuses', values: [...C.v8.vacancyStatuses] }, { key: 'source', label: 'Sources', values: [...C.v8.vacancySources] }]} empty="No vacancies yet — add a company under Client CRM, then open a vacancy." />
       </Panel>
-      <Panel title="Illustrative Client Fee Calculator"><FeeCalculator /></Panel>
+      <Notice>The client is always a company. Placement fees and payment milestones are stored separately from candidate salaries and are visible to the Managing Director and Admin Manager only. This division follows the client’s V8 description; amounts and triggers must match each signed agreement.</Notice>
     </>
   );
 }

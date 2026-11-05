@@ -15,7 +15,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "test:db": "tsx --conditions=react-server tests/db-integration.ts",
-    "user:password": "tsx prisma/set-password.ts"
+    "user:password": "tsx prisma/set-password.ts",
+    "test:v8": "tsx --conditions=react-server tests/db-v8.ts"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.10.1",

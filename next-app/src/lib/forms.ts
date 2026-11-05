@@ -4,6 +4,7 @@
  */
 import { C } from './config';
 import { num, parseDate, norm } from './util';
+import { v8Specs } from './forms-v8';
 
 export type FieldType = 'text' | 'textarea' | 'select' | 'int' | 'number' | 'date' | 'lookup';
 export interface Field {
@@ -118,9 +119,18 @@ Object.assign(specs, {
     { key: 'warranty_start', label: 'Warranty start', type: 'date' },
     { key: 'warranty_expiry', label: 'Warranty expiry', type: 'date', help: 'Labour: filled automatically as start + 3 months if left blank (illustrative, OQ-8). Domestic: enter manually after legal check.' },
   ] },
-  domestic: { label: 'Domestic case', fields: [
-    { key: 'customer', label: 'Customer / household', type: 'text' }, { key: 'origin', label: 'Worker origin', type: 'text', required: true, placeholder: 'e.g. Philippines' },
+  domestic: { label: 'Sponsor case', fields: [
+    // V8: the client is an INDIVIDUAL sponsor — no company / CR / purchase-order fields exist on purpose.
+    sel('sponsor_type', 'Sponsor type', C.v8.sponsorTypes, { required: true, default: 'Qatari Citizen' }),
+    { key: 'customer', label: 'Sponsor full name', type: 'text', required: true },
+    { key: 'qid', label: 'QID / sponsor reference', type: 'text', help: 'Stored encrypted; only the last characters are ever shown. On edit, leave blank to keep the saved value.' },
+    { key: 'mobile', label: 'Mobile', type: 'text' }, { key: 'address', label: 'Address', type: 'text', full: true },
+    sel('category', 'Worker category', C.v8.domesticCategories, { required: true, default: 'Housemaid' }),
+    { key: 'origin', label: 'Worker nationality', type: 'text', required: true, placeholder: 'e.g. Philippines', suggest: 'countries' },
     sel('status', 'Status', C.domesticStatuses, { required: true, default: 'Customer Enquiry' }), { key: 'next_action', label: 'Next action', type: 'text' },
+    { key: 'arrival_date', label: 'Arrival date', type: 'date' },
+    { key: 'handover_date', label: 'Handover date', type: 'date', help: 'Starts the nine-month guarantee window.' },
+    { key: 'handover_note', label: 'Handover evidence / note', type: 'text', full: true, help: 'Describe the evidence on file (e.g. signed handover form). Files go in the Contract Library.' },
   ] },
 } satisfies Record<string, Spec>);
 
@@ -138,3 +148,6 @@ Object.assign(specs, {
     { key: 'record', label: 'Record (description only)', type: 'text', required: true, placeholder: 'e.g. Credentials on file', help: 'Never type passwords, OTPs or login details here.' },
   ] },
 } satisfies Record<string, Spec>);
+
+// V8 record types (client developer package) — defined in forms-v8.ts
+Object.assign(specs, v8Specs);
