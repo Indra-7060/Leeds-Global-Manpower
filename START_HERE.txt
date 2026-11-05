@@ -1,0 +1,15 @@
+LEADS GLOBAL ERP V6 — DEVELOPED VERSION (browser prototype, working data)
+
+1. Open index.html in Chrome or Edge (double-click). If a browser blocks it, run:  node tools/serve.js  and open http://127.0.0.1:5173
+2. You start in the DEMO workspace: fictional sample data, so every screen has numbers to calculate.
+3. Try: Candidates → "Next Stage →"  (watch Dashboard, Visa cards and Master report change) ·
+        Excel Import Center → choose a .xlsx/.csv → match columns → Validate → Import ·
+        Manpower Orders → "+ New Order" · Reports toolbar → export CSV (opens in Excel).
+4. Settings & Data: switch to the LIVE workspace (starts empty, kept separate from demo), backup / restore, data-quality checks.
+
+IMPORTANT: this is an offline prototype, not a production ERP. Data stays in this browser only — no login, server, database,
+encryption or shared access. The role selector is a demonstration, not security. Do not enter real passports, CVs, bank or
+credential details. What production needs is in docs/06_Production_Requirements.md.
+
+Documentation: docs/01 … docs/06  (README.md has the index).
+Tests: node tests/run-tests.js

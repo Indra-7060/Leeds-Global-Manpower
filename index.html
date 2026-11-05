@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Leads Global Manpower | ERP V6 Developed</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="shell">
+  <aside>
+    <div class="brand"><div class="logo">◎</div><div><strong>LEADS GLOBAL</strong><small>MANPOWER · ERP V6</small></div></div>
+    <nav id="nav" aria-label="Main navigation"></nav>
+    <div class="foot" id="foot"></div>
+  </aside>
+  <main>
+    <header>
+      <div><strong>Leads Global Manpower</strong><div class="muted">Recruitment Operations Platform · Qatar</div></div>
+      <div class="login">
+        <button class="mode-pill mode-demo" id="modePill" data-act="goSettings" title="Open Settings & Data" type="button">DEMO DATA</button>
+        <span class="muted">Demo role:</span>
+        <select id="role" class="input" style="width:180px" aria-label="Demo role"></select>
+      </div>
+    </header>
+    <div id="banner"></div>
+    <div class="content" id="view"></div>
+  </main>
+</div>
+<div id="overlay-root"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<!-- configuration -->
+<script src="js/config/config.js"></script>
+<!-- core + data processing (no DOM) -->
+<script src="js/core/util.js"></script>
+<script src="js/io/csv.js"></script>
+<script src="js/io/xlsx.js"></script>
+<script src="js/core/storage.js"></script>
+<script src="js/core/permissions.js"></script>
+<script src="js/core/schema.js"></script>
+<!-- business logic -->
+<script src="js/domain/lifecycle.js"></script>
+<script src="js/domain/rules.js"></script>
+<script src="js/core/store.js"></script>
+<script src="js/domain/metrics.js"></script>
+<script src="js/domain/alerts.js"></script>
+<script src="js/data/seed.js"></script>
+<!-- import / export / reports -->
+<script src="js/io/importer.js"></script>
+<script src="js/io/exporter.js"></script>
+<script src="js/io/cv.js"></script>
+<script src="js/reports/reports.js"></script>
+<!-- UI -->
+<script src="js/ui/components.js"></script>
+<script src="js/ui/crud.js"></script>
+<script src="js/ui/pages/dashboard.js"></script>
+<script src="js/ui/pages/sales.js"></script>
+<script src="js/ui/pages/orders.js"></script>
+<script src="js/ui/pages/candidates.js"></script>
+<script src="js/ui/pages/travel.js"></script>
+<script src="js/ui/pages/divisions.js"></script>
+<script src="js/ui/pages/management.js"></script>
+<script src="js/ui/pages/data.js"></script>
+<script src="js/ui/pages/finance.js"></script>
+<script src="js/ui/app.js"></script>
+</body>
+</html>

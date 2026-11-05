@@ -1,0 +1,332 @@
+{
+ "ranAt": "2026-11-05T12:40:54.019Z",
+ "total": 65,
+ "failed": 0,
+ "results": [
+  {
+   "group": "Utilities & CSV",
+   "name": "parseDate: ISO, day-first, 2-digit year, month names",
+   "ok": true
+  },
+  {
+   "group": "Utilities & CSV",
+   "name": "parseDate: rejects impossible/ambiguous values",
+   "ok": true
+  },
+  {
+   "group": "Utilities & CSV",
+   "name": "parseDate: Excel serial numbers (45292 = 2024-01-01)",
+   "ok": true
+  },
+  {
+   "group": "Utilities & CSV",
+   "name": "addMonths clamps month-end; diffDays",
+   "ok": true
+  },
+  {
+   "group": "Utilities & CSV",
+   "name": "CSV parse: quotes, commas, embedded newline, BOM, escaped quotes",
+   "ok": true
+  },
+  {
+   "group": "Utilities & CSV",
+   "name": "CSV parse: semicolon and tab delimiters auto-detected; quoted delimiter preserved",
+   "ok": true
+  },
+  {
+   "group": "Utilities & CSV",
+   "name": "CSV stringify: quotes everything, doubles quotes, keeps comma inside company name (V6 defect D-7)",
+   "ok": true
+  },
+  {
+   "group": "Utilities & CSV",
+   "name": "CSV stringify: neutralises formula injection but leaves negative numbers alone",
+   "ok": true
+  },
+  {
+   "group": "Candidate lifecycle (V6 stage order, optional-stage skipping)",
+   "name": "14 V6 stages in V6 order",
+   "ok": true
+  },
+  {
+   "group": "Candidate lifecycle (V6 stage order, optional-stage skipping)",
+   "name": "Next stage is the V6 +1 step",
+   "ok": true
+  },
+  {
+   "group": "Candidate lifecycle (V6 stage order, optional-stage skipping)",
+   "name": "Pre-Medical may be skipped (V6: \"if required\")",
+   "ok": true
+  },
+  {
+   "group": "Candidate lifecycle (V6 stage order, optional-stage skipping)",
+   "name": "QVC may be skipped (V6: \"if applicable\")",
+   "ok": true
+  },
+  {
+   "group": "Candidate lifecycle (V6 stage order, optional-stage skipping)",
+   "name": "Non-optional stages cannot be skipped",
+   "ok": true
+  },
+  {
+   "group": "Candidate lifecycle (V6 stage order, optional-stage skipping)",
+   "name": "Reject only from screening stages; terminal stages have no moves",
+   "ok": true
+  },
+  {
+   "group": "Data entry, editing, deletion, integrity",
+   "name": "Demo workspace seeds fictional data (40 candidates, 5 orders)",
+   "ok": true
+  },
+  {
+   "group": "Data entry, editing, deletion, integrity",
+   "name": "Order add: validated, id sequence continues from seed, never reused after delete (V6 defect fixed)",
+   "ok": true
+  },
+  {
+   "group": "Data entry, editing, deletion, integrity",
+   "name": "Order validation: qty must be whole number >= 1; trade/client required",
+   "ok": true
+  },
+  {
+   "group": "Data entry, editing, deletion, integrity",
+   "name": "Candidate id uses country prefix + running counter (BD-/NP-, as V6)",
+   "ok": true
+  },
+  {
+   "group": "Data entry, editing, deletion, integrity",
+   "name": "Duplicate candidate blocked by passport (normalised) and by name+client when no passport (V6 keys)",
+   "ok": true
+  },
+  {
+   "group": "Data entry, editing, deletion, integrity",
+   "name": "Edit candidate keeps stage/history; duplicate check ignores itself",
+   "ok": true
+  },
+  {
+   "group": "Data entry, editing, deletion, integrity",
+   "name": "Stage changes: next/skip/reject go through the workflow and write history; illegal jump refused",
+   "ok": true
+  },
+  {
+   "group": "Data entry, editing, deletion, integrity",
+   "name": "Skip optional stages end-to-end: Offer Accepted → Visa Applied → RTP",
+   "ok": true
+  },
+  {
+   "group": "Data entry, editing, deletion, integrity",
+   "name": "Client rename rewrites linked orders/candidates; delete of used client/order is blocked",
+   "ok": true
+  },
+  {
+   "group": "Data entry, editing, deletion, integrity",
+   "name": "Client names are unique (case/space-insensitive)",
+   "ok": true
+  },
+  {
+   "group": "Data entry, editing, deletion, integrity",
+   "name": "Deleting a candidate removes its travel record and unlinks warranty cases",
+   "ok": true
+  },
+  {
+   "group": "Data entry, editing, deletion, integrity",
+   "name": "Travel record: one per candidate",
+   "ok": true
+  },
+  {
+   "group": "Data entry, editing, deletion, integrity",
+   "name": "Warranty: labour expiry auto = start + 3 months; domestic is not auto-filled",
+   "ok": true
+  },
+  {
+   "group": "Data entry, editing, deletion, integrity",
+   "name": "Credentials register refuses anything that looks like a password",
+   "ok": true
+  },
+  {
+   "group": "Data entry, editing, deletion, integrity",
+   "name": "Finance entry validation: positive amount, valid date, enums",
+   "ok": true
+  },
+  {
+   "group": "Data entry, editing, deletion, integrity",
+   "name": "Activity log records changes (feeds Recent Activity)",
+   "ok": true
+  },
+  {
+   "group": "Demo vs live separation, persistence, backup",
+   "name": "Changes persist across reloads (V6 lost them)",
+   "ok": true
+  },
+  {
+   "group": "Demo vs live separation, persistence, backup",
+   "name": "Live workspace starts empty and is stored under a different key; demo untouched",
+   "ok": true
+  },
+  {
+   "group": "Demo vs live separation, persistence, backup",
+   "name": "Reset demo restores fictional sample only in demo mode",
+   "ok": true
+  },
+  {
+   "group": "Demo vs live separation, persistence, backup",
+   "name": "Backup → clear → restore round-trip; foreign/corrupt files rejected",
+   "ok": true
+  },
+  {
+   "group": "Demo vs live separation, persistence, backup",
+   "name": "Storage quota failure does not crash; app keeps working in memory and reports unsaved",
+   "ok": true
+  },
+  {
+   "group": "Dashboard counters & reports are computed from records",
+   "name": "Labour dashboard on seed: pipeline groups are mutually exclusive and sum to all non-rejected candidates",
+   "ok": true
+  },
+  {
+   "group": "Dashboard counters & reports are computed from records",
+   "name": "Counters update immediately when a record changes",
+   "ok": true
+  },
+  {
+   "group": "Dashboard counters & reports are computed from records",
+   "name": "Master report: V6 formula Remaining = Demand − (Applied+QVC+RTP+Printed+Deployed)",
+   "ok": true
+  },
+  {
+   "group": "Dashboard counters & reports are computed from records",
+   "name": "Master report filters: country and client search",
+   "ok": true
+  },
+  {
+   "group": "Dashboard counters & reports are computed from records",
+   "name": "Each candidate counted in one master-report stage only",
+   "ok": true
+  },
+  {
+   "group": "Dashboard counters & reports are computed from records",
+   "name": "Visa and deployment cards",
+   "ok": true
+  },
+  {
+   "group": "Dashboard counters & reports are computed from records",
+   "name": "Deployment checklist derives from stage + travel record (no duplicated state)",
+   "ok": true
+  },
+  {
+   "group": "Dashboard counters & reports are computed from records",
+   "name": "Domestic dashboard counters from cases",
+   "ok": true
+  },
+  {
+   "group": "Dashboard counters & reports are computed from records",
+   "name": "Finance totals per division: net = incoming − outgoing (V6)",
+   "ok": true
+  },
+  {
+   "group": "Dashboard counters & reports are computed from records",
+   "name": "Costing (V6 formula): Nepal defaults 100 × (1500 − 860) = 64,000; Bangladesh with/without investment; negatives treated as 0",
+   "ok": true
+  },
+  {
+   "group": "Dashboard counters & reports are computed from records",
+   "name": "Seed leaves one flight-ready candidate without a travel record → reminders fire",
+   "ok": true
+  },
+  {
+   "group": "Dashboard counters & reports are computed from records",
+   "name": "Alerts are rule-driven; warranty alert depends on date window",
+   "ok": true
+  },
+  {
+   "group": "Excel / CSV import — validation, duplicates, relationships",
+   "name": "Column mapping guessed from V6 aliases",
+   "ok": true
+  },
+  {
+   "group": "Excel / CSV import — validation, duplicates, relationships",
+   "name": "Candidate import analysis: 3 valid, 2 duplicates (existing passport + same-file), 3 rejected with reasons",
+   "ok": true
+  },
+  {
+   "group": "Excel / CSV import — validation, duplicates, relationships",
+   "name": "Nothing is written during analysis (dry run)",
+   "ok": true
+  },
+  {
+   "group": "Excel / CSV import — validation, duplicates, relationships",
+   "name": "Commit: imported rows land in the SAME list the Candidates page reads and move dashboard counters (V6 defect D-1)",
+   "ok": true
+  },
+  {
+   "group": "Excel / CSV import — validation, duplicates, relationships",
+   "name": "Re-importing the same file adds nothing (idempotent)",
+   "ok": true
+  },
+  {
+   "group": "Excel / CSV import — validation, duplicates, relationships",
+   "name": "Rejected/duplicate rows can be downloaded as a fix-and-retry sheet",
+   "ok": true
+  },
+  {
+   "group": "Excel / CSV import — validation, duplicates, relationships",
+   "name": "Order import: bad quantity, id clash, missing required rejected; true duplicate skipped; good row added with its id",
+   "ok": true
+  },
+  {
+   "group": "Excel / CSV import — validation, duplicates, relationships",
+   "name": "Finance import: role gate, direction/category/date/amount validation, duplicate vs existing entries, defaults",
+   "ok": true
+  },
+  {
+   "group": "Excel / CSV import — validation, duplicates, relationships",
+   "name": "XLSX: real file structure read correctly — shared + inline strings, Excel date serial → ISO date (V6 defect D-8), sheet picker",
+   "ok": true
+  },
+  {
+   "group": "Excel / CSV import — validation, duplicates, relationships",
+   "name": "Unsupported/corrupt files give a clear error",
+   "ok": true
+  },
+  {
+   "group": "Reports & exports",
+   "name": "Every report in the registry runs and every quick-report chip resolves (V6 defect D-9)",
+   "ok": true
+  },
+  {
+   "group": "Reports & exports",
+   "name": "Stage reports match the dashboard/cards (one definition of each stage set)",
+   "ok": true
+  },
+  {
+   "group": "Reports & exports",
+   "name": "Toolbar filters (client/country/stage) narrow candidate reports",
+   "ok": true
+  },
+  {
+   "group": "Reports & exports",
+   "name": "Planned V6 reports return calculated rows (country-wise, agent, warranty expiry, demand & sales)",
+   "ok": true
+  },
+  {
+   "group": "Reports & exports",
+   "name": "Keyword report: routes, finds client + country, explains interpretation, enforces finance restriction",
+   "ok": true
+  },
+  {
+   "group": "Reports & exports",
+   "name": "CSV export: BOM-ready text, headers are labels, injection neutralised, every value quoted",
+   "ok": true
+  },
+  {
+   "group": "Reports & exports",
+   "name": "Exported file name carries the workspace (DEMO/LIVE)",
+   "ok": true
+  },
+  {
+   "group": "Role permissions (demonstration only — not security)",
+   "name": "Finance is restricted for Operations Staff exactly as V6; MD/Nitija allowed",
+   "ok": true
+  }
+ ]
+}

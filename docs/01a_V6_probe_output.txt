@@ -1,0 +1,58 @@
+=== 1. Quick-report buttons: rows returned against the built-in sample data ===
+  0   Interview Schedule       (page: interviews)
+  0   Interview Attendance     (page: interviews)
+  1   Selected Candidates      (page: interviews)
+  0   Rejected Candidates      (page: interviews)
+  1   QVC Pending              (page: visas)
+  0   QVC Completed            (page: visas)
+  0   RTP Pending              (page: visas)
+  1   Visa Printed             (page: visas)
+  1   Flight Pending           (page: deployment)
+  1   Deployment Schedule      (page: deployment)
+  0   Arrived                  (page: deployment)
+  0   Joined                   (page: deployment)
+  1   Tickets Issued           (page: tickets)
+  1   Arrival Schedule         (page: tickets)
+  4   Order Progress           (page: orders)
+  4   Open Orders              (page: orders)
+  0   Candidate List           (page: candidates)
+  0   Agency Candidates        (page: agencies)
+  0   Agency Deployment        (page: agencies)
+  0   Warranty Cases           (page: warranty)
+  0   Domestic Worker Cases    (page: domestic)
+  0   Corporate Placements     (page: corporate)
+
+=== 2. Import writes to a different store than the pages read ===
+v5.candidates length after import      : 1
+page list `candidates` length (unchanged): 4
+Candidates page HTML shows imported row? : false
+Order with quantity "abc" imported OK?  : true (no numeric validation)
+Status "Banana" accepted on import?     : true
+
+=== 3. Dashboard counters ===
+Dashboard shows hard-coded 1,240 / 324 / 186 : [ true, true, true ]
+Actual candidate records in store            : 6
+
+=== 4. Master report is static ===
+Contains hard-coded 2-row sample (Elegancia 300): true
+
+=== 5. Persistence of manual edits ===
+localStorage keys: [ 'lgm_v5_trial_records' ] → candidates/orders arrays are not persisted (only v5 import store + finance)
+
+=== 6. Escaping ===
+Raw HTML injected via Master-report search box: true
+Order client rendered unescaped (<b> tag live) : true
+
+=== 7. Visa-summary CSV (page button) quoting ===
+"Smith, Jones & Co,Nepal,10,1,1,1,1,1" ← company name with a comma is NOT quoted → breaks columns in Excel
+
+=== 8. Two different "visa summary" definitions ===
+Page (hard-coded) columns : Company,Country,Order,Applied,QVC,RTP,Printed,Deployed,Remaining
+CSV v5ExportVisa columns  : client,total,cv_review,interview,selected,visa_applied,qvc,rtp,visa_printed,flight_pending,arrived
+
+=== 9. AI report keyword routing examples ===
+"Show QVC pending for JAAK Nepal"        → no file: No matching records to export.
+"show all payments"                      → no file: No matching records to export.
+"orders for Nepal"                       → 4 data rows
+
+Alerts raised during probe: []
