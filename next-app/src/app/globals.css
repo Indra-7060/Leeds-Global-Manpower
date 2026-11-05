@@ -1,0 +1,116 @@
+/* ===== Leads Global ERP V6 — Developed =====
+   Section 1 is the ORIGINAL V6 visual language (colours, spacing, components) carried over unchanged.
+   Section 2 adds only what working forms/tables need (modal, form errors, toast, toolbar, workspace banner). */
+
+/* ---------- 1. V6 base (preserved) ---------- */
+:root{font-family:Inter,Segoe UI,Arial,sans-serif;color:#172b43;background:#f2f6fa}
+*{box-sizing:border-box}body{margin:0}
+.shell{display:flex;min-height:100vh}
+aside{width:258px;background:#102b48;color:white;padding:24px 14px;flex-shrink:0}
+.brand{display:flex;gap:10px;align-items:center;margin-bottom:28px;padding:0 9px}
+.logo{background:#fff;color:#15507c;border-radius:12px;font-size:25px;padding:11px}
+.brand strong{font-size:15px}.brand small{display:block;color:#a9c3d8;margin-top:5px}
+nav button{display:flex;align-items:center;gap:10px;width:100%;padding:12px 13px;background:transparent;color:#c9d9e7;border:0;border-radius:9px;text-align:left;cursor:pointer;font-size:14px;margin:3px 0}
+nav button.active,nav button:hover{background:#23527a;color:white}
+main{flex:1;min-width:0}
+header{height:76px;background:#fff;border-bottom:1px solid #e0e7ef;display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+.content{padding:27px;max-width:1400px;margin:auto}
+.eyebrow{font-size:12px;letter-spacing:1.3px;color:#63809b;text-transform:uppercase;font-weight:700}
+.title{font-size:27px;margin:7px 0 6px}.muted{color:#73869a;font-size:13px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin:23px 0}
+.card,.panel{background:white;border:1px solid #e0e8f0;border-radius:13px;box-shadow:0 3px 12px #18334b06}
+.card{padding:20px}.card .num{font-size:29px;font-weight:800;margin:13px 0 5px}
+.panel{padding:22px;margin-top:18px}.panel h3{margin:0 0 17px;font-size:17px}
+.pill{display:inline-block;padding:5px 9px;border-radius:30px;background:#eaf1fa;color:#315f87;font-size:11px;font-weight:700}
+.green{background:#e6f7ef;color:#158154}.orange{background:#fff2de;color:#a76505}.grey{background:#edf0f3;color:#657687}.red{background:#feeaea;color:#b34141}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;color:#6c8397;font-size:11px;letter-spacing:.5px;text-transform:uppercase;background:#f8fafc}
+td,th{padding:13px 10px;border-bottom:1px solid #edf1f5}tr:last-child td{border:0}
+.btn{background:#1267a5;color:white;border:0;padding:11px 16px;border-radius:8px;font-weight:650;cursor:pointer;font:inherit;font-weight:650}
+.btn.secondary{background:#e9f1f8;color:#245c86}.btn:disabled{opacity:.5;cursor:not-allowed}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+.tab{border:1px solid #dbe5ee;background:white;padding:9px 15px;border-radius:8px;cursor:pointer;color:#4a6781;font:inherit}
+.tab.selected{background:#145b91;color:white}
+.steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px}
+.step{background:#eef5fb;border-radius:9px;padding:13px;font-size:12px}.step b{display:block;color:#17659c;margin-bottom:8px}
+.split{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
+.bar{background:#e8f0f6;height:10px;border-radius:20px;overflow:hidden;margin:7px 0 17px}.bar>div{height:100%;background:#2984b8;border-radius:20px}
+.input{border:1px solid #d8e2ec;border-radius:8px;padding:11px;width:100%;font:inherit;background:#fff}
+label{font-size:12px;color:#536d83;font-weight:700;display:block;margin-bottom:6px}
+.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.notice{background:#fff7e8;color:#865d18;border:1px solid #f4e0b7;padding:13px;border-radius:9px;font-size:12px;margin-top:16px}
+.hidden{display:none}.divider{border-top:1px solid #e8edf2;margin:20px 0}
+.flow{display:flex;gap:8px;flex-wrap:wrap}.flow span{background:#eaf3fb;border-radius:7px;padding:10px;font-size:12px}
+.flow i{font-style:normal;align-self:center;color:#8aa1b4}
+.metric{font-size:22px;font-weight:750}.foot{color:#8da0b1;font-size:11px;margin-top:20px}
+.login{display:flex;align-items:center;gap:10px}select{cursor:pointer}
+#nav .v6-group{width:100%;display:flex;align-items:center;justify-content:space-between;background:#23527a;color:white;border:0;border-radius:9px;padding:13px;cursor:pointer;font-weight:700;text-align:left;margin:6px 0}
+#nav .v6-sub{margin-left:14px;width:calc(100% - 14px);font-size:12px;padding:10px 11px}
+#nav .v6-section{color:#7fa6c3;font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:14px 10px 5px}
+.v6-tools{background:#fff;border:1px solid #dce7f0;border-radius:13px;padding:17px;margin:0 0 20px;box-shadow:0 3px 12px #18334b06}
+.v6-tools .v6-filter{display:flex;gap:9px;flex-wrap:wrap;margin:13px 0}
+.v6-tools select{min-width:130px;flex:1;max-width:220px;padding:10px;border:1px solid #cbd9e6;border-radius:8px;background:white;color:#18334b}
+.v6-tools button{border:0;border-radius:8px;padding:11px 14px;background:#1765a2;color:white;font-weight:650;cursor:pointer;font:inherit;font-weight:650}
+.v6-tools button.secondary{background:#e7f1f9;color:#16547f}
+.v6-tools small{color:#6c8093;display:block;margin-top:9px}
+.v6-reportlinks{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.v6-reportlinks button{background:#f1f6fb;color:#205778;font-weight:500;padding:8px 11px}
+@media(max-width:1100px){.cards{grid-template-columns:repeat(2,1fr)}.steps{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:800px){aside{width:210px;padding:12px 7px}.content{padding:14px}header{padding:12px;height:auto;flex-wrap:wrap;gap:12px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.shell{display:block}aside{width:100%;padding:13px}.brand{margin-bottom:8px}nav{display:flex;overflow:auto}nav button{white-space:nowrap;width:auto}header{padding:14px;height:auto;align-items:flex-start;gap:10px;flex-wrap:wrap}.content{padding:14px}.cards,.split,.formgrid{grid-template-columns:1fr}.steps{grid-template-columns:repeat(2,1fr)}.panel{overflow:auto}.title{font-size:23px}}
+
+/* ---------- 2. Additions needed by working forms, tables and data separation ---------- */
+.btn.small,.btn.sm{padding:6px 10px;font-size:12px;border-radius:7px}
+.btn.danger{background:#fdeaea;color:#a63030}
+.btn.ghost{background:transparent;color:#245c86;border:1px solid #cfe0ee}
+.table-actions{display:flex;gap:6px;flex-wrap:wrap;min-width:230px}
+.table-actions .btn{white-space:nowrap}
+td .stagebar{max-width:110px}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:0 0 14px}
+.toolbar .input{width:auto;min-width:150px;flex:1;max-width:260px;padding:9px 10px}
+.toolbar .grow{flex:2;max-width:340px}
+.empty{padding:26px;text-align:center;color:#8da0b1;font-size:13px}
+.count{color:#73869a;font-size:12px;margin-left:auto}
+.mode-pill{display:inline-block;padding:5px 10px;border-radius:30px;font-size:11px;font-weight:800;letter-spacing:.6px;cursor:pointer;border:0}
+.mode-demo{background:#fff2de;color:#a76505}.mode-live{background:#e6f7ef;color:#158154}
+.banner{padding:9px 28px;font-size:12px;font-weight:600}
+.banner.demo{background:#fff7e8;color:#865d18;border-bottom:1px solid #f4e0b7}
+.banner.live{background:#fdeaea;color:#8f2a2a;border-bottom:1px solid #f0c4c4}
+.field.err .input{border-color:#d46a6a;background:#fff8f8}.field .errmsg{color:#b34141;font-size:11px;margin-top:4px}
+.field .help{color:#8da0b1;font-size:11px;margin-top:4px;font-weight:400}.field.full{grid-column:1/-1}
+.req{color:#c04a4a}
+.overlay{position:fixed;inset:0;background:#0d233a99;display:flex;align-items:flex-start;justify-content:center;padding:4vh 14px;overflow:auto;z-index:50}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:760px;box-shadow:0 20px 60px #0d233a55}
+.modal.narrow{max-width:460px}
+.modal-h{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid #e8edf2}
+.modal-h h3{margin:0;font-size:17px}.modal-x{background:none;border:0;font-size:22px;cursor:pointer;color:#73869a}
+.modal-b{padding:22px}.modal-f{padding:14px 22px;border-top:1px solid #e8edf2;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.toasts{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:80}
+.toast{background:#102b48;color:#fff;padding:11px 16px;border-radius:9px;font-size:13px;box-shadow:0 8px 24px #0d233a44;max-width:380px}
+.toast.err{background:#a63030}.toast.ok{background:#158154}
+.stagebar{display:flex;gap:3px;flex-wrap:wrap;margin:6px 0 0}
+.stagebar i{width:12px;height:6px;border-radius:3px;background:#dbe5ee;display:inline-block}.stagebar i.on{background:#2984b8}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;font-size:13px}.kv b{color:#536d83}
+.list-plain{margin:0;padding-left:18px;font-size:13px;line-height:1.7}
+.tag{display:inline-block;background:#eef5fb;color:#3b6a8f;border-radius:5px;padding:2px 7px;font-size:11px;margin:1px 3px 1px 0}
+.src{font-size:10px;color:#8da0b1;display:block}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:12px}
+.scroll-x{overflow:auto}
+tr.dim td{opacity:.55}
+.checklist{list-style:none;margin:0;padding:0}.checklist li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #edf1f5;font-size:13px;align-items:center}
+.checklist .ck{width:20px;height:20px;border-radius:50%;background:#e8f0f6;display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:#fff;flex-shrink:0}
+.checklist .ck.done{background:#158154}
+@media(max-width:760px){.modal-h,.modal-b,.modal-f{padding-left:14px;padding-right:14px}.banner{padding:8px 14px}.toolbar .input,.toolbar .grow{max-width:none;min-width:100%}.kv{grid-template-columns:1fr}}
+
+/* ---------- Next.js app additions ---------- */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{background:#fff;border:1px solid #e0e8f0;border-radius:14px;padding:28px;width:100%;max-width:400px;box-shadow:0 8px 30px #18334b14}
+nav a{display:flex;align-items:center;gap:10px;width:100%;padding:12px 13px;color:#c9d9e7;border-radius:9px;text-decoration:none;font-size:14px;margin:3px 0}
+nav a.active,nav a:hover{background:#23527a;color:#fff}
+nav a.v6-sub{margin-left:14px;width:calc(100% - 14px);font-size:12px;padding:10px 11px}
+nav a .soon{margin-left:auto;font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:#7fa6c3}
+.v6-group-link{background:#23527a!important;color:#fff!important;font-weight:700}
+a.btn{text-decoration:none;display:inline-block}
+.who{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.linkbtn{background:none;border:0;color:#245c86;cursor:pointer;font:inherit;text-decoration:underline;padding:0}

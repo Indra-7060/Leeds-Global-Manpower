@@ -1,0 +1,109 @@
+'use server';
+import { revalidatePath } from 'next/cache';
+import { requireUser, requirePermission } from '@/lib/auth/dal';
+import { setWorkspace } from '@/lib/auth/session';
+import * as R from '@/lib/repo/mutations';
+import * as R2 from '@/lib/repo/mutations-more';
+import * as R3 from '@/lib/repo/mutations-3';
+import type { Errors } from '@/lib/forms';
+
+export interface FormState { ok?: boolean; errors?: Errors; message?: string; values?: Record<string, string>; nonce?: number }
+export type Entity = 'clients' | 'orders' | 'candidates' | 'visits' | 'demands' | 'allocations' | 'interviews' | 'tickets' | 'warranties' | 'domestic' | 'finance' | 'credentials';
+type Simple = 'visits' | 'demands' | 'allocations' | 'interviews' | 'tickets' | 'warranties' | 'domestic';
+
+const refresh = () => revalidatePath('/', 'layout');
+const toState = (r: R.Result, doneMsg: string, values?: Record<string, string>): FormState =>
+  r.ok ? { ok: true, message: doneMsg + (r.warnings?.length ? ' — note: ' + r.warnings.join(' ') : '') } : { ok: false, errors: r.errors, values, nonce: Date.now() + Math.random() };
+
+/** Create (id = null) or update a record. Bound from the client form: saveEntity.bind(null, entity, id). */
+export async function saveEntity(entity: Entity, id: number | null, _prev: FormState, formData: FormData): Promise<FormState> {
+  const { user, ws } = await requireUser();
+  const actor: R.Actor = { workspace: ws, role: user.role, userId: user.userId };
+  const input = Object.fromEntries([...formData.entries()].filter(([, v]) => typeof v === 'string')) as Record<string, string>;
+  const fn = { clients: R.saveClient, orders: R.saveOrder, candidates: R.saveCandidate, visits: R2.saveVisit, demands: R2.saveDemand, allocations: R2.saveAllocation,
+    interviews: R2.saveInterview, tickets: R2.saveTicket, warranties: R2.saveWarranty, domestic: R2.saveDomestic, finance: R3.saveFinance, credentials: R3.saveCredential }[entity];
+  if (!fn) return { ok: false, errors: { _: 'Unknown record type.' } };
+  const res = await fn(actor, input, id ?? undefined);
+  if (res.ok && entity === 'candidates' && input._cv) await R3.setCvStatus(actor, Number(input._cv), 'Candidate created'); // created from a CV intake item
+  if (res.ok) refresh();
+  return toState(res, `${id ? 'Updated' : 'Saved'}${res.ok && res.code ? ' ' + res.code : ''}`, input);
+}
+
+export async function deleteEntity(entity: Entity, id: number): Promise<FormState> {
+  const { user, ws } = await requireUser();
+  const actor: R.Actor = { workspace: ws, role: user.role, userId: user.userId };
+  const res = entity === 'clients' ? await R.deleteClient(actor, id) : entity === 'orders' ? await R.deleteOrder(actor, id) : entity === 'candidates' ? await R.deleteCandidate(actor, id)
+    : entity === 'finance' ? await R3.deleteFinance(actor, id) : entity === 'credentials' ? await R3.deleteCredential(actor, id) : await R2.deleteSimple(actor, entity as Simple, id);
+  if (res.ok) refresh();
+  return toState(res, 'Deleted');
+}
+
+export async function moveStage(id: number, to: string): Promise<FormState> {
+  const { user, ws } = await requireUser();
+  const res = await R.moveCandidate({ workspace: ws, role: user.role, userId: user.userId }, id, to);
+  if (res.ok) refresh();
+  return toState(res, `Moved to ${to}`);
+}
+
+export async function undoStage(id: number): Promise<FormState> {
+  const { user, ws } = await requireUser();
+  const res = await R.undoCandidate({ workspace: ws, role: user.role, userId: user.userId }, id);
+  if (res.ok) refresh();
+  return toState(res, 'Stage corrected');
+}
+
+export async function switchWorkspace(target: 'demo' | 'live'): Promise<FormState> {
+  await requirePermission('workspace.switch');
+  await setWorkspace(target);
+  refresh();
+  return { ok: true, message: `${target.toUpperCase()} workspace active` };
+}
+
+/** Move a travel record / warranty case / domestic case one step along its workflow. */
+export async function advanceStep(entity: 'tickets' | 'warranties' | 'domestic', id: number): Promise<FormState> {
+  const { user, ws } = await requireUser();
+  const res = await R2.advanceStatus({ workspace: ws, role: user.role, userId: user.userId }, entity, id);
+  if (res.ok) refresh();
+  return toState(res, 'Moved to the next step');
+}
+
+// ───────────── Stage 3 actions ─────────────
+const actorOf = async () => { const { user, ws } = await requireUser(); return { workspace: ws, role: user.role, userId: user.userId } as R.Actor; };
+
+export async function clearFinanceAction(): Promise<FormState> {
+  const res = await R3.clearFinance(await actorOf()); if (res.ok) refresh(); return toState(res, 'Finance entries cleared');
+}
+export async function setCvStatusAction(id: number, status: string): Promise<FormState> {
+  const res = await R3.setCvStatus(await actorOf(), id, status); if (res.ok) refresh(); return toState(res, 'Updated');
+}
+export async function deleteCvAction(id: number): Promise<FormState> {
+  const res = await R3.deleteCvItem(await actorOf(), id); if (res.ok) refresh(); return toState(res, 'Deleted');
+}
+export async function resetDemoAction(): Promise<FormState> {
+  const res = await R3.resetDemo(await actorOf()); if (res.ok) refresh(); return toState(res, 'Demo data reset');
+}
+/** Clearing a workspace is destructive: the caller must type DELETE. Checked here, on the server. */
+export async function clearWorkspaceAction(typed: string): Promise<FormState> {
+  if (typed.trim() !== 'DELETE') return { ok: false, errors: { _: 'Type DELETE (capitals) to confirm.' } };
+  const res = await R3.clearWorkspace(await actorOf()); if (res.ok) refresh(); return toState(res, 'Workspace cleared');
+}
+export async function changePasswordAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const next = String(formData.get('next') ?? ''), again = String(formData.get('again') ?? '');
+  if (next !== again) return { ok: false, errors: { again: 'The two new passwords do not match.' } };
+  const res = await R3.changeOwnPassword(await actorOf(), String(formData.get('current') ?? ''), next);
+  if (res.ok) return { ok: true, message: 'Password changed' };
+  return { ok: false, errors: res.errors.password ? { next: res.errors.password } : res.errors };
+}
+export async function createUserAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const v = { email: String(formData.get('email') ?? ''), name: String(formData.get('name') ?? ''), role: String(formData.get('role') ?? ''), password: String(formData.get('password') ?? '') };
+  const res = await R3.createUser(await actorOf(), v);
+  if (res.ok) refresh();
+  // on failure keep what was typed (except the password) so the admin does not have to retype everything
+  return res.ok ? { ok: true, message: 'User created' } : { ok: false, errors: res.errors, values: { email: v.email, name: v.name, role: v.role }, nonce: Date.now() + Math.random() };
+}
+export async function setUserActiveAction(id: number, active: boolean): Promise<FormState> {
+  const res = await R3.setUserActive(await actorOf(), id, active); if (res.ok) refresh(); return toState(res, active ? 'User enabled' : 'User disabled');
+}
+export async function resetUserPasswordAction(id: number, password: string): Promise<FormState> {
+  const res = await R3.resetUserPassword(await actorOf(), id, password); return toState(res, 'Password reset');
+}

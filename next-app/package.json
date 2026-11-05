@@ -1,0 +1,50 @@
+{
+  "name": "lgm-erp-next",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "postinstall": "prisma generate",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "test:db": "tsx --conditions=react-server tests/db-integration.ts",
+    "user:password": "tsx prisma/set-password.ts"
+  },
+  "dependencies": {
+    "@prisma/adapter-mariadb": "^7.10.1",
+    "@prisma/client": "^7.10.1",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^18.0.9",
+    "exceljs": "^4.4.0",
+    "jose": "^6.2.15",
+    "jszip": "^3.10.2",
+    "next": "16.4.5",
+    "prisma": "^7.10.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.5",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.1.0"
+  },
+  "allowScripts": {
+    "prisma@7.10.1": true,
+    "@prisma/engines@7.10.1": true,
+    "esbuild@0.28.2": true
+  }
+}

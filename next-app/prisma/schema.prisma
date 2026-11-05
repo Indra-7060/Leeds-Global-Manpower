@@ -1,0 +1,368 @@
+// Leads Global ERP — database schema (MySQL / MariaDB via XAMPP).
+//
+// Design notes
+//  • Every business table has `workspace` ("demo" | "live") so fictional sample data can never mix with real records.
+//    Every query goes through src/lib/repo (which always filters by workspace).
+//  • Human-readable codes (ORD-1001, BD-1001, DL-1001 …) are separate from the numeric primary key.
+//  • Stage / status / list values are plain strings validated in code (src/lib/config) so the client can change them
+//    without a database migration.
+//  • Dates are real DATE columns; links between records are real foreign keys (V6 linked clients by name only).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ───────────────────────── users & infrastructure ─────────────────────────
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  name         String
+  role         String   @default("staff") // md | nitija | staff
+  passwordHash String
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  activity ActivityLog[]
+
+  @@map("users")
+}
+
+/// Running numbers for codes: ORD-1001, BD-1001, DL-1001, WR-101, DW-001 (one row per workspace + kind).
+model Counter {
+  id        Int    @id @default(autoincrement())
+  workspace String @db.VarChar(10)
+  kind      String @db.VarChar(30)
+  next      Int
+
+  @@unique([workspace, kind])
+  @@map("counters")
+}
+
+model ActivityLog {
+  id         Int      @id @default(autoincrement())
+  workspace  String   @db.VarChar(10)
+  at         DateTime @default(now())
+  userId     Int?
+  role       String   @default("") @db.VarChar(20)
+  entity     String   @default("") @db.VarChar(30)
+  recordCode String   @default("") @db.VarChar(40)
+  client     String   @default("")
+  text       String   @db.Text
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([workspace, at])
+  @@map("activity_log")
+}
+
+model ImportRecord {
+  id         Int      @id @default(autoincrement())
+  workspace  String   @db.VarChar(10)
+  file       String
+  target     String   @db.VarChar(20)
+  added      Int
+  duplicates Int
+  invalid    Int
+  at         DateTime @default(now())
+  role       String   @default("") @db.VarChar(20)
+
+  @@index([workspace, at])
+  @@map("import_records")
+}
+
+// ───────────────────────── sales & orders ─────────────────────────
+
+model Client {
+  id         Int      @id @default(autoincrement())
+  workspace  String   @db.VarChar(10)
+  name       String
+  nameKey    String   // normalised name, used for the "client names are unique" rule
+  sector     String   @default("")
+  stage      String   @default("Prospect") @db.VarChar(20) // Active | Prospect
+  nextAction String   @default("")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  visits      Visit[]
+  demands     DemandLetter[]
+  orders      Order[]
+  candidates  Candidate[]
+  interviews  Interview[]
+  warranties  WarrantyCase[]
+  credentials CredentialRecord[]
+
+  @@unique([workspace, nameKey])
+  @@map("clients")
+}
+
+model Visit {
+  id            Int       @id @default(autoincrement())
+  workspace     String    @db.VarChar(10)
+  clientId      Int
+  contact       String    @default("")
+  date          DateTime  @db.Date
+  outcome       String    @db.VarChar(30)
+  pipelineStage String    @default("") @db.VarChar(40)
+  nextAction    String    @default("")
+  salesperson   String    @default("")
+  notes         String    @default("") @db.Text
+  createdAt     DateTime  @default(now())
+
+  client Client @relation(fields: [clientId], references: [id])
+
+  @@index([workspace, date])
+  @@map("visits")
+}
+
+model DemandLetter {
+  id               Int       @id @default(autoincrement())
+  workspace        String    @db.VarChar(10)
+  code             String    @db.VarChar(20) // DL-1001
+  clientId         Int
+  orderId          Int?
+  letterDate       DateTime? @db.Date
+  countries        String    @default("")
+  trades           String    @default("")
+  quantities       String    @default("")
+  nationality      String    @default("")
+  salaryBenefits   String    @default("")
+  signed           String    @default("No") @db.VarChar(3)
+  agencyAllocation String    @default("")
+  status           String    @default("Received") @db.VarChar(30)
+  createdAt        DateTime  @default(now())
+
+  client Client @relation(fields: [clientId], references: [id])
+  order  Order? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@unique([workspace, code])
+  @@map("demand_letters")
+}
+
+model Order {
+  id        Int      @id @default(autoincrement())
+  workspace String   @db.VarChar(10)
+  code      String   @db.VarChar(20) // ORD-1001
+  clientId  Int
+  country   String   @db.VarChar(60)
+  trade     String
+  qty       Int
+  status    String   @default("New Order") @db.VarChar(40)
+  agency    String   @default("")
+  importKey String?  // duplicate key used by imports (V6 rule)
+  sourceFile String?
+  sourceRow  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client      Client             @relation(fields: [clientId], references: [id])
+  candidates  Candidate[]
+  allocations AgencyAllocation[]
+  demands     DemandLetter[]
+
+  @@unique([workspace, code])
+  @@index([workspace, importKey])
+  @@map("orders")
+}
+
+model AgencyAllocation {
+  id        Int      @id @default(autoincrement())
+  workspace String   @db.VarChar(10)
+  agency    String
+  country   String   @db.VarChar(60)
+  orderId   Int
+  allocated Int
+  status    String   @default("Sourcing") @db.VarChar(40)
+  createdAt DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@index([workspace])
+  @@map("agency_allocations")
+}
+
+// ───────────────────────── candidates & pipeline ─────────────────────────
+
+model Candidate {
+  id         Int       @id @default(autoincrement())
+  workspace  String    @db.VarChar(10)
+  code       String    @db.VarChar(20) // BD-1001 / NP-1003
+  name       String
+  passport   String    @default("")
+  dupKey     String    // V6 duplicate key: passport if present, else name+client (unique per workspace)
+  clientId   Int
+  orderId    Int?
+  country    String    @db.VarChar(60)
+  agency     String    @default("")
+  trade      String
+  status     String    @default("CV Submitted") @db.VarChar(40)
+  visaNumber String    @default("")
+  qvcDate    DateTime? @db.Date
+  flightDate DateTime? @db.Date
+  sourceFile String?
+  sourceRow  Int?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  client     Client           @relation(fields: [clientId], references: [id])
+  order      Order?           @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  history    CandidateStage[]
+  travel     TravelRecord?
+  warranties WarrantyCase[]
+
+  @@unique([workspace, code])
+  @@unique([workspace, dupKey])
+  @@index([workspace, status])
+  @@index([workspace, clientId])
+  @@map("candidates")
+}
+
+model CandidateStage {
+  id          Int      @id @default(autoincrement())
+  candidateId Int
+  stage       String   @db.VarChar(40)
+  at          DateTime @default(now())
+  byRole      String   @default("") @db.VarChar(20)
+
+  candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@index([candidateId])
+  @@map("candidate_stages")
+}
+
+model Interview {
+  id         Int       @id @default(autoincrement())
+  workspace  String    @db.VarChar(10)
+  clientId   Int
+  method     String    @db.VarChar(30)
+  country    String    @db.VarChar(60)
+  date       DateTime? @db.Date
+  candidates Int       @default(0)
+  status     String    @default("Scheduled") @db.VarChar(20)
+  createdAt  DateTime  @default(now())
+
+  client Client @relation(fields: [clientId], references: [id])
+
+  @@index([workspace, date])
+  @@map("interviews")
+}
+
+model TravelRecord {
+  id          Int      @id @default(autoincrement())
+  workspace   String   @db.VarChar(10)
+  candidateId Int      @unique // one travel record per candidate
+  ticketBy    String   @default("") @db.VarChar(10)
+  flight      String   @default("")
+  driverName  String   @default("")
+  driverPhone String   @default("")
+  step        String   @default("Pending") @db.VarChar(30)
+  createdAt   DateTime @default(now())
+
+  candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@index([workspace])
+  @@map("travel_records")
+}
+
+model WarrantyCase {
+  id             Int       @id @default(autoincrement())
+  workspace      String    @db.VarChar(10)
+  code           String    @db.VarChar(20) // WR-101
+  division       String    @db.VarChar(10) // Labour | Domestic
+  clientId       Int?
+  clientLabel    String    @default("") // household / free-text client for domestic cases
+  candidateId    Int?
+  issue          String
+  status         String    @default("Pending") @db.VarChar(30)
+  warrantyStart  DateTime? @db.Date
+  warrantyExpiry DateTime? @db.Date
+  createdAt      DateTime  @default(now())
+
+  client    Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  candidate Candidate? @relation(fields: [candidateId], references: [id], onDelete: SetNull)
+
+  @@unique([workspace, code])
+  @@map("warranty_cases")
+}
+
+model DomesticCase {
+  id         Int      @id @default(autoincrement())
+  workspace  String   @db.VarChar(10)
+  code       String   @db.VarChar(20) // DW-001
+  customer   String   @default("")
+  origin     String   @db.VarChar(60)
+  status     String   @default("Customer Enquiry") @db.VarChar(40)
+  nextAction String   @default("")
+  createdAt  DateTime @default(now())
+
+  @@unique([workspace, code])
+  @@map("domestic_cases")
+}
+
+// ───────────────────────── registers, finance, intake ─────────────────────────
+
+/// Descriptions only. Passwords / OTPs must never be stored here (a real vault is required — see docs).
+model CredentialRecord {
+  id        Int      @id @default(autoincrement())
+  workspace String   @db.VarChar(10)
+  clientId  Int
+  portal    String   @db.VarChar(30)
+  record    String
+  access    String   @default("Authorized only")
+  createdAt DateTime @default(now())
+
+  client Client @relation(fields: [clientId], references: [id])
+
+  @@map("credential_records")
+}
+
+model FinanceEntry {
+  id         Int      @id @default(autoincrement())
+  workspace  String   @db.VarChar(10)
+  date       DateTime @db.Date
+  division   String   @db.VarChar(10) // labour | domestic
+  direction  String   @db.VarChar(10) // Incoming | Outgoing
+  account    String   @db.VarChar(20)
+  party      String
+  client     String   @default("")
+  country    String   @default("") @db.VarChar(60)
+  orderRef   String   @default("")
+  category   String   @db.VarChar(40)
+  amount     Decimal  @db.Decimal(14, 2)
+  ref        String   @default("")
+  note       String   @default("")
+  importKey  String?
+  sourceFile String?
+  sourceRow  Int?
+  createdAt  DateTime @default(now())
+
+  @@index([workspace, date])
+  @@index([workspace, importKey])
+  @@map("finance_entries")
+}
+
+model CvIntakeItem {
+  id             Int      @id @default(autoincrement())
+  workspace      String   @db.VarChar(10)
+  filename       String
+  size           Int      @default(0)
+  type           String   @default("") @db.VarChar(10)
+  source         String   @default("Direct upload") @db.VarChar(30)
+  client         String   @default("")
+  agency         String   @default("")
+  country        String   @default("") @db.VarChar(60)
+  status         String   @default("Needs review") @db.VarChar(30)
+  note           String   @default("")
+  extractedEmail String   @default("")
+  extractedPhone String   @default("")
+  preview        String   @default("") @db.Text
+  receivedAt     DateTime @default(now())
+
+  @@index([workspace, filename, size])
+  @@map("cv_intake_items")
+}
