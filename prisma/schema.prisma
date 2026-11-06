@@ -712,3 +712,14 @@ model ListItem {
   @@unique([workspace, kind, value])
   @@map("list_items")
 }
+
+/// Level-wise access per role and module (none / view / edit / full). Missing rows use the defaults in src/lib/access-config.ts.
+model RoleAccess {
+  id     Int    @id @default(autoincrement())
+  role   String @db.VarChar(10)
+  module String @db.VarChar(30)
+  level  String @db.VarChar(5)
+
+  @@unique([role, module])
+  @@map("role_access")
+}

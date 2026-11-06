@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { apiUser } from '@/lib/auth/dal';
+import { accessError } from '@/lib/repo/access';
 import { extractCv } from '@/lib/io/cv';
 import { addCvItems, type CvItemInput } from '@/lib/repo/mutations-3';
 
@@ -10,6 +11,7 @@ export const runtime = 'nodejs';
 export async function POST(req: NextRequest) {
   const ctx = await apiUser();
   if (!ctx) return NextResponse.json({ error: 'Please sign in again.' }, { status: 401 });
+  { const denied = await accessError(ctx.user.role, { module: 'cv_inbox' }, 'edit'); if (denied) return NextResponse.json({ error: denied }, { status: 403 }); }
   const form = await req.formData();
   const files = form.getAll('files').filter((f): f is File => f instanceof File);
   if (!files.length) return NextResponse.json({ error: 'Choose at least one file.' }, { status: 400 });

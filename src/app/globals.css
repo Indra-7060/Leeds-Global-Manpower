@@ -120,3 +120,6 @@ a.btn{text-decoration:none;display:inline-block}
 .v8tile{padding:17px;border:1px solid #dce5ef;border-radius:12px;background:#fff}
 .v8tile h4{margin:0 0 9px}.v8tile p{font-size:13px;color:#60758b;line-height:1.55;margin:0 0 12px}
 .btn.ghost.small{background:transparent;color:#4a6781}
+
+/* view-only screens: hide add / edit / delete controls (the server refuses the writes too) */
+.readonly .panel-actions,.readonly .table-actions{display:none!important}

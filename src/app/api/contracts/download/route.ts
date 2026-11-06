@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { apiUser } from '@/lib/auth/dal';
+import { accessError } from '@/lib/repo/access';
 import { readContractVersion } from '@/lib/repo/contracts';
 
 export const runtime = 'nodejs';
@@ -8,6 +9,7 @@ export const runtime = 'nodejs';
 export async function GET(req: NextRequest) {
   const ctx = await apiUser();
   if (!ctx) return NextResponse.json({ error: 'Please sign in again.' }, { status: 401 });
+  { const denied = await accessError(ctx.user.role, { module: 'contracts' }, 'view'); if (denied) return NextResponse.json({ error: denied }, { status: 403 }); }
   const id = Number(req.nextUrl.searchParams.get('version'));
   if (!Number.isInteger(id)) return NextResponse.json({ error: 'Missing version.' }, { status: 400 });
   const r = await readContractVersion({ workspace: ctx.ws, role: ctx.user.role, userId: ctx.user.userId }, id);

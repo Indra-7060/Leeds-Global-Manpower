@@ -5,6 +5,7 @@ import { applyFilters, keywordReport, runReport } from '@/lib/domain/reports';
 import type { ReportResult } from '@/lib/domain/types';
 import { toCsv } from '@/lib/io/csv';
 import { toXlsx } from '@/lib/io/xlsx';
+import { accessError } from '@/lib/repo/access';
 import { loadState } from '@/lib/repo/state';
 import { V8_REPORTS } from '@/lib/repo/reports-v8';
 import { audit } from '@/lib/repo/mutations-v8';
@@ -21,6 +22,7 @@ export const runtime = 'nodejs';
 export async function GET(req: NextRequest) {
   const ctx = await apiUser();
   if (!ctx) return NextResponse.json({ error: 'Please sign in again.' }, { status: 401 });
+  { const denied = await accessError(ctx.user.role, { module: 'reports' }, 'view'); if (denied) return NextResponse.json({ error: denied }, { status: 403 }); }
   const p = req.nextUrl.searchParams, actor = { workspace: ctx.ws, role: ctx.user.role, userId: ctx.user.userId };
   const filters = { client: p.get('client') ?? 'All', country: p.get('country') ?? 'All', stage: p.get('stage') ?? 'All', today: todayISO() };
   const wanted = p.get('report') ?? '';

@@ -13,7 +13,7 @@ export function Heading({ title, desc, actions }: { title: string; desc: string;
   return (
     <div className="row between">
       <div><div className="eyebrow">LGM / {title}</div><h1 className="title">{title}</h1><div className="muted">{desc}</div></div>
-      {actions && <div className="row">{actions}</div>}
+      {actions && <div className="row panel-actions">{actions}</div>}
     </div>
   );
 }
@@ -24,7 +24,7 @@ export const Cards = ({ children, cols }: { children: ReactNode; cols?: number }
   <div className="cards" style={cols ? { gridTemplateColumns: `repeat(${cols},minmax(0,1fr))` } : undefined}>{children}</div>
 );
 export const Panel = ({ title, children, actions }: { title: string; children: ReactNode; actions?: ReactNode }) => (
-  <section className="panel"><div className="row between"><h3>{title}</h3><div className="row">{actions}</div></div>{children}</section>
+  <section className="panel"><div className="row between"><h3>{title}</h3><div className="row panel-actions">{actions}</div></div>{children}</section>
 );
 export const Flow = ({ items }: { items: readonly string[] }) => (
   <div className="flow">{items.map((s, i) => <span key={s + i} style={{ display: 'contents' }}><span>{s}</span>{i < items.length - 1 && <i>→</i>}</span>)}</div>

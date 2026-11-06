@@ -4,6 +4,7 @@ import { can } from '@/lib/config';
 import { FIELDS, REQUIRED, guessMapping, problemRows, type Target } from '@/lib/domain/importer';
 import { stringifyCsv } from '@/lib/io/csv';
 import { readTable } from '@/lib/io/readTable';
+import { accessError } from '@/lib/repo/access';
 import { analyseUpload, commitImport } from '@/lib/repo/import';
 
 export const runtime = 'nodejs';
@@ -17,6 +18,7 @@ const err = (message: string, status = 400) => NextResponse.json({ error: messag
 export async function POST(req: NextRequest) {
   const ctx = await apiUser();
   if (!ctx) return err('Please sign in again.', 401);
+  { const denied = await accessError(ctx.user.role, { module: 'import' }, 'edit'); if (denied) return err(denied, 403); }
   const form = await req.formData();
   const file = form.get('file'), mode = String(form.get('mode') ?? 'parse'), target = String(form.get('target') ?? 'candidates') as Target;
   if (!(file instanceof File)) return err('Choose a file first.');

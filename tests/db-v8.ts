@@ -185,6 +185,19 @@ async function main() {
   check('STAFF cannot edit the lists; standard and duplicate choices are refused', no(await R5.addListItem(staff, 'jobCategory', 'Pilot')) && no(await R5.addListItem(md, 'jobCategory', 'engineer')) && no(await R5.addListItem(md, 'nope', 'x')));
   check('MD adds a custom category and removes it again', (await R5.addListItem(md, 'domesticCategory', 'Tutor')).ok && no(await R5.addListItem(md, 'domesticCategory', 'tutor')) && (await R5.deleteListItem(md, (await prisma.listItem.findFirst({ where: { workspace: ws, value: 'Tutor' } }))!.id)).ok);
 
+  // ───────── 10. Level-wise access per role ─────────
+  console.log('\n— roles & access —');
+  const AC = await import('../src/lib/repo/access');
+  check('standard: staff may edit orders, cannot delete, and has no access to finance or contracts', (await AC.accessError('staff', { entity: 'orders' }, 'edit')) === null && (await AC.accessError('staff', { entity: 'orders' }, 'full')) !== null && (await AC.accessError('staff', { entity: 'finance' }, 'view')) !== null && (await AC.accessError('staff', { module: 'contracts' }, 'view')) !== null);
+  check('only the Managing Director can change access', no(await AC.setAccess(ni, 'staff', 'orders', 'view')) && no(await AC.setAccess(staff, 'staff', 'orders', 'full')));
+  check('nobody can lift Operations Staff above the ceiling on money or contracts', no(await AC.setAccess(md, 'staff', 'finance', 'view')) && no(await AC.setAccess(md, 'staff', 'contracts', 'edit')));
+  check('the Managing Director row cannot be changed', no(await AC.setAccess(md, 'md', 'orders', 'none')));
+  check('MD sets staff → Manpower Orders = view only: edits are refused, looking is fine', (await AC.setAccess(md, 'staff', 'orders', 'view')).ok && (await AC.accessError('staff', { entity: 'orders' }, 'edit')) !== null && (await AC.accessError('staff', { module: 'orders' }, 'view')) === null);
+  check('MD sets staff → Interviews = none: even viewing is refused', (await AC.setAccess(md, 'staff', 'interviews', 'none')).ok && (await AC.accessError('staff', { module: 'interviews' }, 'view')) !== null && (await AC.accessError('staff', { entity: 'interviewEntries' }, 'edit')) !== null);
+  check('MD lowers Nitija on Tasks to view; MD is unaffected', (await AC.setAccess(md, 'nitija', 'tasks', 'view')).ok && (await AC.accessError('nitija', { entity: 'tasks' }, 'edit')) !== null && (await AC.accessError('md', { entity: 'tasks' }, 'full')) === null);
+  check('changes are in the audit log', (await prisma.activityLog.count({ where: { workspace: ws, entity: 'access' } })) >= 3);
+  check('reset restores the standard levels', (await AC.resetAccess(md, 'staff')).ok && (await AC.resetAccess(md, 'nitija')).ok && (await AC.accessError('staff', { entity: 'orders' }, 'edit')) === null && (await AC.accessError('nitija', { entity: 'tasks' }, 'full')) === null && (await AC.accessError('staff', { module: 'interviews' }, 'edit')) === null);
+
   // every V8 report listed in the UI exists and runs
   const { V8_REPORTS } = await import('../src/lib/repo/reports-v8'); const { V8_REPORT_NAMES } = await import('../src/lib/quick');
   let reportsOk = true; const bad: string[] = [];

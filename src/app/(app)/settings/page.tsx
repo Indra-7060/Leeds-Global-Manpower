@@ -10,6 +10,9 @@ import DangerZone from './danger-zone';
 import PasswordForm from './password-form';
 import UsersAdmin from './users-admin';
 import { ListEditor } from '@/components/V8Controls';
+import AccessMatrix from '@/components/AccessMatrix';
+import { loadAllMatrices } from '@/lib/repo/access';
+import { LEVEL_LABEL, MODULES } from '@/lib/access-config';
 import { LIST_KINDS } from '@/lib/repo/mutations-v8b';
 
 const TRAVEL = ['Visa Printed', 'Deployment Ready', 'Arrived', 'Joined', 'Warranty'];
@@ -19,6 +22,7 @@ export default async function SettingsPage() {
   const s = await loadState(ws), today = todayISO();
   const listItems = await prisma.listItem.findMany({ where: { workspace: ws }, orderBy: { value: 'asc' } });
   const canLists = can(user.role, 'lists.manage');
+  const matrices = await loadAllMatrices(), mine = matrices[user.role];
   const users = can(user.role, 'users.manage') ? await prisma.user.findMany({ orderBy: { id: 'asc' }, select: { id: true, email: true, name: true, role: true, active: true } }) : [];
   const counts: [string, number][] = [['Clients', s.clients.length], ['Orders', s.orders.length], ['Candidates', s.candidates.length], ['Visits', s.visits.length], ['Demand letters', s.demands.length], ['Agency allocations', s.allocations.length],
     ['Interviews', s.interviews.length], ['Travel records', s.tickets.length], ['Warranty cases', s.warranties.length], ['Domestic cases', s.domestic.length], ['Credential records', s.credentials.length],
@@ -51,6 +55,12 @@ export default async function SettingsPage() {
         {can(user.role, 'data.backup') ? <DownloadButton url="/api/backup" label="Download workspace export (JSON)" /> : <p className="muted">Only the Managing Director or Admin Manager can export workspace data.</p>}
       </Panel>
       <Panel title="Data Tools"><DangerZone ws={ws} canReset={can(user.role, 'data.reset')} /></Panel>
+      <Panel title={can(user.role, 'users.manage') ? 'Roles & Access (level-wise authorization)' : 'My access'}>
+        {can(user.role, 'users.manage') ? <AccessMatrix matrices={matrices} /> : <>
+          <p className="muted" style={{ marginTop: 0 }}>What your role ({roleLabel(user.role)}) can do in each part of the system. Only the Managing Director can change this.</p>
+          <Table head={['Module', 'Your access']} rows={MODULES.map(m => [m.label, <span key={m.id} className={`pill ${mine[m.id] === 'none' ? 'grey' : mine[m.id] === 'view' ? 'orange' : 'green'}`}>{LEVEL_LABEL[mine[m.id]]}</span>])} />
+        </>}
+      </Panel>
       <Panel title="Editable lists">
         <p className="muted" style={{ marginTop: 0 }}>Standard choices (grey) are fixed; you can add your own (green) and remove them again. Existing records keep the value they were saved with.</p>
         {(Object.keys(LIST_KINDS) as (keyof typeof LIST_KINDS)[]).map(k => canLists ? <ListEditor key={k} kind={k} label={LIST_KINDS[k].label} base={LIST_KINDS[k].base} items={listItems.filter(i => i.kind === k).map(i => ({ id: i.id, value: i.value }))} /> : <p key={k}><b>{LIST_KINDS[k].label}:</b> {[...LIST_KINDS[k].base, ...listItems.filter(i => i.kind === k).map(i => i.value)].join(', ')}</p>)}

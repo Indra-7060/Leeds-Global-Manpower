@@ -162,3 +162,14 @@ Legend: **Built** = works and is covered by an automated test · **Partly** = wo
 | Finance report buttons were shown to Operations Staff (the server already refused the download) | Hidden for users who may not download them. |
 
 New migration `20261107000000_v8_segments_agencies` (additive): `clients.segment`, `contracts.archivedAt`, tables `agencies` and `list_items`. Demo data gains one Corporate-only company, two “Both” companies and three registered agencies.
+
+## 7. Level-wise authorization (roles × modules)
+
+Every screen belongs to a **module**; each role has one **level** per module: *No access* (menu item hidden, page/downloads/actions refused), *View only* (add/edit/delete buttons hidden and refused), *View + add/edit*, *Full (incl. delete)*. The Managing Director edits the matrix in **Settings → Roles & Access**; other roles see **My access**. Changes are saved at once and written to the audit log.
+
+* Standard levels: Managing Director and Admin Manager = full everywhere; Operations Staff = view + add/edit on the operating modules, view-only on Reports, **no access** to Private Finance, Sponsor Payments & Refunds, Placement Fees, Service Charges and the Contract Library.
+* Hard limits that the matrix cannot override: Operations Staff can never be given money or contract modules (V8 §5), and the Managing Director always keeps full access.
+* Enforced on the server: one check in the app layout for every screen, plus checks in every write action (add/edit need *edit*, delete needs *full*, stage moves, approvals, archive), the import, CV, export and contract APIs. Hiding the buttons is only a convenience.
+* Existing rules still apply on top (for example only the Managing Director approves refunds and deposit allocations).
+* Staff previously could delete records; with the standard levels they can add/edit but not delete — raise a module to *Full* if the client wants staff to delete.
+* Tests: `tests/access.test.ts` (rules) and the “roles & access” block of `npm run test:v8`.

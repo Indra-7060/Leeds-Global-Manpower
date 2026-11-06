@@ -5,6 +5,8 @@ Rebuild of the V6 dashboard as a real web application: **Next.js 16** (App Route
 ## V8 update (client developer package)
 The client’s V8 package is now partly built: three independent divisions with their own tabs (Domestic sponsors, payments, 9-month guarantee & manual refund review · Corporate vacancies, candidates and placement fees with due dates · optional Blue-Collar service charge), an encrypted **Contract Library** (versions, exact-original download, ZIP), **Tasks & Alerts**, MD-approved agency-deposit allocation, interview attendance, a **Management Overview**, and real **.xlsx** export. See `docs/08_V8_Gap_Analysis_and_Status.md` for what is built, what is not (MFA, WhatsApp/e-mail, virus scan, off-site backups, PostgreSQL, PDF documents) and the assumptions to confirm.
 
+The Managing Director can set **level-wise access** per role and module in Settings → Roles & Access (see docs/08, section 7).
+
 After pulling this update run `npm run db:migrate` (adds 13 tables, nothing is dropped) and `npm run db:seed` (re-creates the DEMO data with V8 samples). Optional `.env` values: `DATA_KEY` (base64, 32 bytes — encrypts QIDs and contract files; **back it up**) and `STORAGE_DIR` (contract files, default `./storage`).
 
 ## Status — stages 1–3 (V6 scope)

@@ -2,14 +2,15 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { moduleForPath } from '@/lib/access-config';
 import { CORPORATE_PAGES, DIVISIONS, DOMESTIC_PAGES, LABOUR_PAGES, MANAGEMENT, hrefOf, type NavItem } from '@/lib/nav';
 
 /** `perms` lists the permissions the signed-in user has (computed on the server). The server still re-checks every page. */
-export default function Sidebar({ perms }: { perms: string[] }) {
+export default function Sidebar({ perms, hidden }: { perms: string[]; hidden: string[] }) {
   const path = usePathname();
   const [open, setOpen] = useState(true);
   const is = (href: string) => (href === '/' ? path === '/' : path === href || path.startsWith(href + '/'));
-  const allowed = (i: NavItem) => !i.perm || perms.includes(i.perm);
+  const allowed = (i: NavItem) => (!i.perm || perms.includes(i.perm)) && !hidden.includes(moduleForPath('/' + i.slug)?.id ?? '');
   const active = path.startsWith('/domestic') ? 'domestic' : path.startsWith('/corporate') ? 'corporate' : 'labour';
   const inLabour = LABOUR_PAGES.some(p => is(hrefOf(p)));
   const group = (title: string, pages: NavItem[]) => (
