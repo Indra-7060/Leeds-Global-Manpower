@@ -18,6 +18,7 @@ describe('database connection settings', () => {
     expect('ssl' in set('mysql://u:p@h:3306/d?ssl=true')).toBe(true);
     expect((set('mysql://u:p@h:3306/d?sslaccept=accept_invalid_certs') as { ssl: { rejectUnauthorized: boolean } }).ssl.rejectUnauthorized).toBe(false);
   });
+  it('uses generous connect timeouts for distant hosted databases', () => { const c = set('mysql://u:p@h:3306/d'); expect(c.connectTimeout).toBeGreaterThanOrEqual(10000); expect(c.acquireTimeout).toBeGreaterThan(c.connectTimeout); expect(c.minimumIdle).toBe(0); });
   it('pool size can be set', () => { process.env.DB_POOL = '7'; expect(set('mysql://u:p@h/d').connectionLimit).toBe(7); expect(poolConfig(3).connectionLimit).toBe(3); });
   it('refuses to run without DATABASE_URL', () => { delete process.env.DATABASE_URL; expect(() => poolConfig()).toThrow(/DATABASE_URL/); });
 });

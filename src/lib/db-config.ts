@@ -14,6 +14,9 @@ export function poolConfig(connectionLimit?: number) {
     database: u.pathname.replace(/^\//, ''),
     // serverless hosts open many short-lived instances: keep each pool small (override with DB_POOL)
     connectionLimit: connectionLimit ?? (Number(process.env.DB_POOL) || (process.env.VERCEL ? 2 : 5)),
+    // the driver default is 1 s to connect, which is too short for an encrypted connection to a distant hosted database (e.g. Vercel in the US -> TiDB in Singapore)
+    connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT_MS) || 20000, acquireTimeout: 30000,
+    minimumIdle: 0, // open connections on demand: idle connections of a frozen serverless instance die silently
     // hosted MySQL needs TLS: add ?ssl=true (or ?sslaccept=strict) to DATABASE_URL; ?sslaccept=accept_invalid_certs skips certificate checks
     ...(wantsTls(u) ? { ssl: { rejectUnauthorized: u.searchParams.get('sslaccept') !== 'accept_invalid_certs' }, allowPublicKeyRetrieval: true } : {}),
   };
