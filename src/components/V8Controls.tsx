@@ -42,7 +42,7 @@ export function TaskToggle({ id, done }: { id: number; done: boolean }) {
 }
 
 /** Upload a NEW version of a contract. The file is sent to /api/contracts/upload (type, size and content are re-checked there). */
-export function ContractUpload({ contractId, code }: { contractId: number; code: string }) {
+export function ContractUpload({ contractId, code, maxMB }: { contractId: number; code: string; maxMB?: number }) {
   const [open, setOpen] = useState(false); const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
   const fileRef = useRef<HTMLInputElement>(null); const noteRef = useRef<HTMLInputElement>(null); const toast = useToast(); const router = useRouter();
   const send = async () => {
@@ -61,7 +61,7 @@ export function ContractUpload({ contractId, code }: { contractId: number; code:
       {open && (
         <Modal title={`Upload a file to ${code}`} narrow onClose={() => setOpen(false)}
           footer={<><button className="btn secondary" type="button" onClick={() => setOpen(false)}>Cancel</button><button className="btn" type="button" onClick={send} disabled={busy}>{busy ? 'Uploading…' : 'Upload'}</button></>}>
-          <p style={{ marginTop: 0, fontSize: 13 }}>Each upload becomes a <b>new version</b>; earlier files are kept and can always be downloaded. Allowed: {C.v8.uploadExtensions.join(', ')} (max {C.v8.uploadMaxMB} MB). Files are stored encrypted.</p>
+          <p style={{ marginTop: 0, fontSize: 13 }}>Each upload becomes a <b>new version</b>; earlier files are kept and can always be downloaded. Allowed: {C.v8.uploadExtensions.join(', ')} (max {maxMB ?? C.v8.uploadMaxMB} MB). Files are stored encrypted.</p>
           {err && <div className="notice" role="alert" style={{ background: '#feeaea', color: '#8f2a2a', borderColor: '#f0c4c4' }}>{err}</div>}
           <div className="field"><label htmlFor="ct_file">File</label><input id="ct_file" ref={fileRef} className="input" type="file" accept={C.v8.uploadExtensions.map(e => '.' + e).join(',')} /></div>
           <div className="field"><label htmlFor="ct_note">Version note (optional)</label><input id="ct_note" ref={noteRef} className="input" type="text" maxLength={300} placeholder="e.g. signed copy / amendment 1" /></div>

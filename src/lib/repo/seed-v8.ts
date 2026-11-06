@@ -8,10 +8,10 @@ import { addMonths, isoToDate } from '@/lib/util';
 
 const d = (s?: string | null) => isoToDate(s || null);
 
-export async function clearV8Data(tx: Pick<PrismaClient, 'agency' | 'listItem' | 'interviewEntry' | 'financeAllocation' | 'receivablePayment' | 'serviceFeeInvoice' | 'serviceFeeTerm' | 'contractVersion' | 'contract' | 'refundClaim' | 'domesticAccount' | 'placementFee' | 'corporatePlacement' | 'corporateVacancy' | 'task'>, where: { workspace: string }) {
+export async function clearV8Data(tx: Pick<PrismaClient, 'agency' | 'listItem' | 'storedFile' | 'interviewEntry' | 'financeAllocation' | 'receivablePayment' | 'serviceFeeInvoice' | 'serviceFeeTerm' | 'contractVersion' | 'contract' | 'refundClaim' | 'domesticAccount' | 'placementFee' | 'corporatePlacement' | 'corporateVacancy' | 'task'>, where: { workspace: string }) {
   await tx.interviewEntry.deleteMany({ where }); await tx.financeAllocation.deleteMany({ where }); await tx.receivablePayment.deleteMany({ where });
   await tx.serviceFeeInvoice.deleteMany({ where }); await tx.serviceFeeTerm.deleteMany({ where });
-  await tx.contractVersion.deleteMany({ where }); await tx.contract.deleteMany({ where });
+  await tx.contractVersion.deleteMany({ where }); await tx.contract.deleteMany({ where }); await tx.storedFile.deleteMany({ where: { key: { startsWith: where.workspace + '/' } } });
   await tx.refundClaim.deleteMany({ where }); await tx.domesticAccount.deleteMany({ where });
   await tx.placementFee.deleteMany({ where }); await tx.corporatePlacement.deleteMany({ where }); await tx.corporateVacancy.deleteMany({ where });
   await tx.task.deleteMany({ where }); await tx.agency.deleteMany({ where }); await tx.listItem.deleteMany({ where });

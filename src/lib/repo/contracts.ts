@@ -15,7 +15,21 @@ import { fail, log, type Actor, type Result } from './mutations';
  * original bytes is kept and re-checked on download, so “download the exact original” can be proven.
  * Storage folder: STORAGE_DIR (default ./storage). Back this folder up together with the database and DATA_KEY.
  */
-const root = () => path.resolve(process.env.STORAGE_DIR || path.join(process.cwd(), 'storage'));
+const root = () => path.resolve(/*turbopackIgnore: true*/ process.env.STORAGE_DIR || path.join(/*turbopackIgnore: true*/ process.cwd(), 'storage'));
+
+/** Where the (already encrypted) bytes live: 'disk' = STORAGE_DIR folder (local / own server), 'db' = the MySQL table stored_files (default on Vercel). */
+export const storageDriver = (): 'disk' | 'db' => (process.env.STORAGE_DRIVER === 'db' || process.env.STORAGE_DRIVER === 'disk' ? process.env.STORAGE_DRIVER : process.env.VERCEL ? 'db' : 'disk');
+/** Vercel rejects request bodies above ~4.5 MB, so the practical upload limit there is 4 MB. */
+export const uploadLimitMB = () => (process.env.VERCEL ? Math.min(C.v8.uploadMaxMB, 4) : C.v8.uploadMaxMB);
+
+async function putFile(key: string, data: Buffer) {
+  if (storageDriver() === 'db') { await prisma.storedFile.create({ data: { key, data: new Uint8Array(data), size: data.length } }); return; } // unique key: an existing file is never overwritten
+  const full = path.join(/*turbopackIgnore: true*/ root(), key); await mkdir(path.dirname(full), { recursive: true }); await writeFile(full, data, { flag: 'wx' });
+}
+async function getFile(key: string): Promise<Buffer> {
+  if (storageDriver() === 'db') { const f = await prisma.storedFile.findUnique({ where: { key } }); if (!f) throw new Error('missing'); return Buffer.from(f.data); }
+  return readFile(path.join(/*turbopackIgnore: true*/ root(), key));
+}
 const NO_VIEW = 'Contracts are available to the Managing Director and Admin Manager.';
 
 const MAGIC: Record<string, (b: Buffer) => boolean> = {
@@ -38,15 +52,14 @@ export async function addContractVersion(a: Actor, contractId: number, file: { n
   const name = safeName(file.name), ext = name.split('.').pop()?.toLowerCase() ?? '';
   if (!C.v8.uploadExtensions.includes(ext)) return fail({ _: `File type .${ext || '?'} is not allowed. Allowed: ${C.v8.uploadExtensions.join(', ')}.` });
   if (!file.buf.length) return fail({ _: 'The file is empty.' });
-  if (file.buf.length > C.v8.uploadMaxMB * 1024 * 1024) return fail({ _: `File is larger than ${C.v8.uploadMaxMB} MB.` });
+  if (file.buf.length > uploadLimitMB() * 1024 * 1024) return fail({ _: `File is larger than ${uploadLimitMB()} MB.` });
   if (!MAGIC[ext]?.(file.buf)) return fail({ _: `The content of “${name}” does not look like a real .${ext} file.` });
   const s = await scan(file.buf); if (!s.ok) return fail({ _: 'The file was blocked by the virus scan.' });
   const c = await prisma.contract.findFirst({ where: { id: contractId, workspace: a.workspace }, include: { versions: { select: { version: true } } } });
   if (!c) return fail({ _: 'Contract not found.' });
   const version = (c.versions.reduce((m, v) => Math.max(m, v.version), 0)) + 1;
-  const storageKey = `${a.workspace}/${c.code}/v${version}-${randomUUID()}.bin`, full = path.join(root(), storageKey);
-  await mkdir(path.dirname(full), { recursive: true });
-  await writeFile(full, encryptBuffer(file.buf), { flag: 'wx' }); // 'wx' = refuse to overwrite an existing file
+  const storageKey = `${a.workspace}/${c.code}/v${version}-${randomUUID()}.bin`;
+  await putFile(storageKey, encryptBuffer(file.buf)); // never overwrites an existing file
   try {
     await prisma.$transaction(async tx => {
       await tx.contractVersion.create({ data: { workspace: a.workspace, contractId: c.id, version, filename: name, mime: MIME[ext], size: file.buf.length, sha256: sha256(file.buf), storageKey, note: note.slice(0, 300), uploadedById: a.userId } });
@@ -62,7 +75,7 @@ export async function readContractVersion(a: Actor, versionId: number): Promise<
   const v = await prisma.contractVersion.findFirst({ where: { id: versionId, workspace: a.workspace }, include: { contract: true } });
   if (!v) return { ok: false, error: 'File not found.', status: 404 };
   let buf: Buffer;
-  try { buf = decryptBuffer(await readFile(path.join(root(), v.storageKey))); } catch { return { ok: false, error: 'The stored file could not be read or decrypted (missing file or wrong DATA_KEY).', status: 500 }; }
+  try { buf = decryptBuffer(await getFile(v.storageKey)); } catch { return { ok: false, error: 'The stored file could not be read or decrypted (missing file or wrong DATA_KEY).', status: 500 }; }
   if (sha256(buf) !== v.sha256) return { ok: false, error: 'Integrity check failed — the stored file no longer matches its original checksum.', status: 500 };
   await audit(a, 'contracts', v.contract.code, `Downloaded ${v.contract.code} version ${v.version} (${v.filename})`);
   return { ok: true, buf, filename: v.filename, mime: v.mime || 'application/octet-stream' };
@@ -78,7 +91,7 @@ export async function zipContracts(a: Actor, scope: { clientId?: number; caseId?
     const folder = zip.folder(safeName(`${c.code}_${c.title}`))!;
     for (const v of c.versions) {
       try {
-        const buf = decryptBuffer(await readFile(path.join(root(), v.storageKey)));
+        const buf = decryptBuffer(await getFile(v.storageKey));
         if (sha256(buf) !== v.sha256) return { ok: false, error: `Integrity check failed for ${c.code} version ${v.version}.`, status: 500 };
         folder.file(`v${v.version}_${safeName(v.filename)}`, buf); files++;
       } catch { return { ok: false, error: `Could not read ${c.code} version ${v.version}.`, status: 500 }; }

@@ -198,6 +198,24 @@ async function main() {
   check('changes are in the audit log', (await prisma.activityLog.count({ where: { workspace: ws, entity: 'access' } })) >= 3);
   check('reset restores the standard levels', (await AC.resetAccess(md, 'staff')).ok && (await AC.resetAccess(md, 'nitija')).ok && (await AC.accessError('staff', { entity: 'orders' }, 'edit')) === null && (await AC.accessError('nitija', { entity: 'tasks' }, 'full')) === null && (await AC.accessError('staff', { module: 'interviews' }, 'edit')) === null);
 
+  // ───────── 11. Database file storage (the Vercel mode: no persistent disk) ─────────
+  console.log('\n— database file storage —');
+  process.env.STORAGE_DRIVER = 'db';
+  const dbc = await R.saveContract(md, { division: 'labour', client: clientA.name, title: 'TEST db-stored contract', agreement_type: 'Other' });
+  const dct = (await prisma.contract.findFirst({ where: { workspace: ws, title: 'TEST db-stored contract' } }))!;
+  const pdfDb = Buffer.from('%PDF-1.4\n% stored in the database\n%%EOF');
+  check('contract created and a file uploaded in database-storage mode', dbc.ok && (await K.addContractVersion(md, dct.id, { name: 'db.pdf', buf: pdfDb }, '')).ok);
+  const dbv = (await prisma.contractVersion.findFirst({ where: { contractId: dct.id } }))!;
+  const stored = await prisma.storedFile.findUnique({ where: { key: dbv.storageKey } });
+  check('the stored bytes are ciphertext (no readable PDF text) and nothing was written to the disk folder', !!stored && !Buffer.from(stored.data).includes('stored in the database') && !(await import('node:fs')).existsSync(path.join(dir, dbv.storageKey)));
+  const dbDown = await K.readContractVersion(md, dbv.id);
+  check('download returns the exact original bytes from the database', dbDown.ok && Buffer.compare(dbDown.buf, pdfDb) === 0);
+  check('a second upload becomes v2 and the ZIP holds both', (await K.addContractVersion(md, dct.id, { name: 'db2.pdf', buf: Buffer.from('%PDF-1.4\n% second\n%%EOF') }, '')).ok && (await K.zipContracts(md, { clientId: clientA.id })).ok);
+  await prisma.storedFile.update({ where: { key: dbv.storageKey }, data: { data: new Uint8Array(Buffer.concat([Buffer.from(stored!.data).subarray(0, 40), Buffer.from('X')])) } });
+  check('a tampered database file is detected', !(await K.readContractVersion(md, dbv.id)).ok);
+  check('reset demo also removes the database-stored files', (await R3.resetDemo(md)).ok && (await prisma.storedFile.count({ where: { key: { startsWith: 'demo/' } } })) === 0);
+  process.env.STORAGE_DRIVER = 'disk';
+
   // every V8 report listed in the UI exists and runs
   const { V8_REPORTS } = await import('../src/lib/repo/reports-v8'); const { V8_REPORT_NAMES } = await import('../src/lib/quick');
   let reportsOk = true; const bad: string[] = [];

@@ -37,7 +37,7 @@ The JSON export in Settings is a readable copy, **not** a backup. Back up the da
 1. Start **MySQL** in the XAMPP Control Panel.
 2. In phpMyAdmin (http://localhost/phpmyadmin) create an empty database, e.g. `leeds_global_manpower` (collation `utf8mb4_unicode_ci`).
 3. Edit `.env`: `DATABASE_URL="mysql://root:@localhost:3306/<database>"` (XAMPP's `root` user has an empty password by default) and set `SESSION_SECRET` to a long random string.
-4. `npm run db:migrate` — creates the 31 tables.
+4. `npm run db:migrate` — creates the 35 tables.
 5. `npm run db:seed` — creates three accounts and the fictional DEMO workspace. **The generated password is printed once.**
 6. `npm run dev` → http://localhost:3000 (XAMPP's Apache on port 80 is not used).
 
@@ -50,7 +50,7 @@ Accounts: `md@lgm.local` (Managing Director), `nitija@lgm.local` (Admin Manager)
 
 ## Layout
 ```
-prisma/schema.prisma        31 tables (workspace column on every business table) · migrations/ · seed.ts
+prisma/schema.prisma        35 tables (workspace column on every business table) · migrations/ · seed.ts
 src/lib/config.ts           every list/stage/default (assumptions tagged OQ-n — change here when the client confirms)
 src/lib/forms.ts            form definitions + server-side validation
 src/lib/domain/             pure business logic: lifecycle, rules, metrics, alerts, reports, importer (unit-tested)

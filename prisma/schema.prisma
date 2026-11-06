@@ -713,6 +713,17 @@ model ListItem {
   @@map("list_items")
 }
 
+/// Encrypted contract files when STORAGE_DRIVER=db (the default on Vercel, which has no persistent disk). Content is AES-256-GCM ciphertext.
+model StoredFile {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique @db.VarChar(190)
+  data      Bytes
+  size      Int
+  createdAt DateTime @default(now())
+
+  @@map("stored_files")
+}
+
 /// Level-wise access per role and module (none / view / edit / full). Missing rows use the defaults in src/lib/access-config.ts.
 model RoleAccess {
   id     Int    @id @default(autoincrement())

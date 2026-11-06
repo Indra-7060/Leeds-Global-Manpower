@@ -1,4 +1,5 @@
 import { requirePermission } from '@/lib/auth/dal';
+import { uploadLimitMB } from '@/lib/repo/contracts';
 import { v8Lookups } from '@/lib/repo/lookups-v8';
 import { prisma } from '@/lib/db';
 import * as V from '@/lib/domain/v8';
@@ -29,7 +30,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
       cells: [c.code, C.v8.contractDivisions.find(d => d[0] === c.division)?.[1] ?? c.division, <><b>{owner}</b><div className="muted">{c.domesticCase ? 'Individual sponsor' : 'Company'}</div></>, <>{c.title}<div className="muted">{c.agreementType}{c.order ? ` · ${c.order.code}` : ''}</div></>,
         dateToISO(c.expiryDate) ? <>{dateToISO(c.expiryDate)}<div><span className={`pill ${bandClass(band)}`}>{band || 'OK'}</span></div></> : '—',
         c.versions.length ? <div className="table-actions">{c.versions.map(v => <DownloadButton key={v.id} url={`/api/contracts/download?version=${v.id}`} label={`⇩ v${v.version}`} cls={`secondary small${v === last ? '' : ' ghost'}`} />)}</div> : <span className="muted">No file yet</span>],
-      actions: manage ? <><ContractUpload contractId={c.id} code={c.code} /><ArchiveButton id={c.id} archived={!!c.archivedAt} /><EntityForm entity="contracts" id={c.id} label="Edit" cls="secondary small" lookups={lookups}
+      actions: manage ? <><ContractUpload contractId={c.id} code={c.code} maxMB={uploadLimitMB()} /><ArchiveButton id={c.id} archived={!!c.archivedAt} /><EntityForm entity="contracts" id={c.id} label="Edit" cls="secondary small" lookups={lookups}
         values={{ division: c.division, client: c.client?.name ?? '', case_id: c.domesticCaseId ? String(c.domesticCaseId) : '', title: c.title, agreement_type: c.agreementType, signed_date: dateToISO(c.signedDate), effective_date: dateToISO(c.effectiveDate), expiry_date: dateToISO(c.expiryDate), order_id: c.orderId ? String(c.orderId) : '', billing_terms: c.billingTerms, warranty_terms: c.warrantyTerms, notes: c.notes }} /></> : undefined,
     };
   });
