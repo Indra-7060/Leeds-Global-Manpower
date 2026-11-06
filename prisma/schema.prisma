@@ -116,7 +116,7 @@ model Visit {
   pipelineStage String   @default("") @db.VarChar(40)
   nextAction    String   @default("")
   salesperson   String   @default("")
-  notes         String   @default("") @db.Text
+  notes         String   @default("") @db.VarChar(2000)
   createdAt     DateTime @default(now())
 
   client Client @relation(fields: [clientId], references: [id])
@@ -389,7 +389,7 @@ model CvIntakeItem {
   note           String   @default("")
   extractedEmail String   @default("")
   extractedPhone String   @default("")
-  preview        String   @default("") @db.Text
+  preview        String   @default("") @db.VarChar(2000)
   receivedAt     DateTime @default(now())
 
   @@index([workspace, filename, size])
@@ -606,9 +606,9 @@ model Contract {
   effectiveDate  DateTime? @db.Date
   expiryDate     DateTime? @db.Date
   orderId        Int?
-  billingTerms   String    @default("") @db.Text
-  warrantyTerms  String    @default("") @db.Text
-  notes          String    @default("") @db.Text
+  billingTerms   String    @default("") @db.VarChar(2000)
+  warrantyTerms  String    @default("") @db.VarChar(2000)
+  notes          String    @default("") @db.VarChar(2000)
   archivedAt     DateTime? // archived contracts are hidden from alerts but never deleted
   createdAt      DateTime  @default(now())
 
@@ -648,7 +648,7 @@ model Task {
   workspace    String    @db.VarChar(10)
   code         String    @db.VarChar(20) // TK-1001
   title        String
-  detail       String    @default("") @db.Text
+  detail       String    @default("") @db.VarChar(2000)
   kind         String    @default("Manual") @db.VarChar(30)
   assigneeId   Int?
   createdById  Int?

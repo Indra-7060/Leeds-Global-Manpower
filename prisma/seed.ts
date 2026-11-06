@@ -9,10 +9,10 @@ import { randomBytes } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import { PrismaClient } from '../src/generated/prisma/client';
+import { poolConfig } from '../src/lib/db-config';
 import { seedDemoWorkspace } from '../src/lib/repo/seed';
 
-const url = new URL(process.env.DATABASE_URL ?? '');
-const prisma = new PrismaClient({ adapter: new PrismaMariaDb({ host: url.hostname, port: Number(url.port || 3306), user: decodeURIComponent(url.username), password: decodeURIComponent(url.password), database: url.pathname.slice(1), connectionLimit: 3 }) });
+const prisma = new PrismaClient({ adapter: new PrismaMariaDb(poolConfig(3)) });
 
 async function seedUsers() {
   if ((await prisma.user.count()) > 0) { console.log('Users already exist — leaving accounts unchanged.'); return; }

@@ -82,7 +82,7 @@ CREATE TABLE `visits` (
     `pipelineStage` VARCHAR(40) NOT NULL DEFAULT '',
     `nextAction` VARCHAR(191) NOT NULL DEFAULT '',
     `salesperson` VARCHAR(191) NOT NULL DEFAULT '',
-    `notes` TEXT NOT NULL DEFAULT '',
+    `notes` VARCHAR(2000) NOT NULL DEFAULT '',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     INDEX `visits_workspace_date_idx`(`workspace`, `date`),
@@ -310,7 +310,7 @@ CREATE TABLE `cv_intake_items` (
     `note` VARCHAR(191) NOT NULL DEFAULT '',
     `extractedEmail` VARCHAR(191) NOT NULL DEFAULT '',
     `extractedPhone` VARCHAR(191) NOT NULL DEFAULT '',
-    `preview` TEXT NOT NULL DEFAULT '',
+    `preview` VARCHAR(2000) NOT NULL DEFAULT '',
     `receivedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     INDEX `cv_intake_items_workspace_filename_size_idx`(`workspace`, `filename`, `size`),
