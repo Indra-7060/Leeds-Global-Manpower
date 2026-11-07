@@ -12,6 +12,7 @@ import { ToastProvider } from '@/components/Toaster';
 import ReportsToolbar from '@/components/ReportsToolbar';
 import { prisma } from '@/lib/db';
 import { AutoRefresh } from '@/components/V8Controls';
+import Icon from '@/components/icons';
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const { user, ws } = await requireUser();
@@ -28,17 +29,18 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     <ToastProvider>
       <div className="shell">
         <aside>
-          <div className="brand"><div className="logo">◎</div><div><strong>LEADS GLOBAL</strong><small>MANPOWER · ERP</small></div></div>
+          <div className="brand"><div className="logo"><Icon name="agencies" size={22} /></div><div><strong>LEADS GLOBAL</strong><small>MANPOWER · QATAR</small></div></div>
           <Sidebar perms={perms} hidden={hidden} />
-          <div className="foot" style={{ padding: 15 }}>Next.js build<br />{ws === 'demo' ? 'Sample data' : 'Working records'} · MySQL</div>
+          <div className="foot">{ws === 'demo' ? 'Demo workspace · fictional data' : 'Live workspace'}<br />Recruitment Operations Platform</div>
         </aside>
         <main>
           <header>
             <div><strong>Leads Global Manpower</strong><div className="muted">Recruitment Operations Platform · Qatar</div></div>
             <div className="who">
               <WorkspaceSwitch ws={ws} canSwitch={can(user.role, 'workspace.switch')} />
-              <span className="muted">{user.name === roleLabel(user.role) ? user.name : `${user.name} · ${roleLabel(user.role)}`}</span>
-              <form action={logoutAction}><button className="btn secondary small" type="submit">Sign out</button></form>
+              <span className="avatar" aria-hidden="true">{user.name.split(/s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()}</span>
+              <span className="who-text"><b>{user.name}</b><span>{roleLabel(user.role)}</span></span>
+              <form action={logoutAction}><button className="btn ghost small" type="submit">Sign out</button></form>
             </div>
           </header>
           <div className={`banner ${ws === 'demo' ? 'demo' : 'live'}`}>

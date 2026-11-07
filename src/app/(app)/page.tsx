@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth/dal';
 import { loadState } from '@/lib/repo/state';
-import { C } from '@/lib/config';
+import { C, roleLabel } from '@/lib/config';
 import * as M from '@/lib/domain/metrics';
 import { computeAlerts } from '@/lib/domain/alerts';
 import { sum } from '@/lib/util';
-import { Bar, Cards, Flow, Heading, Metric, Notice, Panel, Table } from '@/components/ui';
+import { Cards, Donut, Flow, Metric, Notice, Panel, Timeline } from '@/components/ui';
+import Icon from '@/components/icons';
 import { overview } from '@/lib/repo/dashboard-v8';
 import { money } from '@/lib/util';
 
@@ -17,7 +18,14 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <Heading title="Management Dashboard" desc="Overview of the three recruitment divisions" />
+      <section className="hero">
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div className="eyebrow" style={{ color: 'rgba(255,255,255,.75)' }}>Management dashboard</div>
+          <h1>{user.name === roleLabel(user.role) ? 'Welcome back' : `Welcome back, ${user.name.split(' ')[0]}`}</h1>
+          <p>Orders, candidates, visas and money across Blue-Collar, Domestic and Corporate recruitment — {new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())}.</p>
+        </div>
+        <div className="hero-actions"><Link href="/orders" className="btn"><Icon name="plus" size={15} /> New order</Link><Link href="/candidates" className="btn secondary">Candidates</Link><Link href="/tasks" className="btn secondary">Tasks &amp; alerts</Link></div>
+      </section>
       {denied && <Notice>You do not have permission for that action ({denied}).</Notice>}
       <div className="tabs">{tabs.map(([id, label]) => <Link key={id} href={`/?tab=${id}`} className={`tab ${tab === id ? 'selected' : ''}`}>{label}</Link>)}</div>
 
@@ -26,20 +34,20 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         return (
           <>
             <Cards>
-              <Metric label="Open Orders" value={m.openOrders} sub="Across active clients" /><Metric label="CVs Received" value={m.cvsReceived.toLocaleString('en-US')} sub="Candidate records" />
-              <Metric label="Visa Pipeline" value={m.visaPipeline} sub="Across visa stages" /><Metric label="Ready to Fly" value={m.readyToFly} sub="Deployment queue" />
+              <Metric label="Open Orders" value={m.openOrders} sub="Across active clients" icon="orders" /><Metric label="CVs Received" value={m.cvsReceived.toLocaleString('en-US')} sub="Candidate records" icon="candidates" tone="info" />
+              <Metric label="Visa Pipeline" value={m.visaPipeline} sub="Across visa stages" icon="visas" tone="gold" /><Metric label="Ready to Fly" value={m.readyToFly} sub="Deployment queue" icon="deployment" tone="ok" />
             </Cards>
             <div className="split">
               <Panel title="Live Recruitment Pipeline">
-                {m.groups.map(g => <Bar key={g.label} label={g.label} count={g.count} pct={(g.count / total) * 100} />)}
-                <p className="muted">Each candidate is counted once, in their current stage group. Deployed and rejected candidates are not shown here.</p>
+                <Donut data={m.groups.map(g => ({ label: g.label, value: g.count }))} centre={{ value: total === 1 && m.groups.every(g => g.count === 0) ? 0 : sum(m.groups, g => g.count), label: 'in pipeline' }} />
+                <p className="muted" style={{ marginBottom: 0 }}>Each candidate is counted once, in their current stage group. Deployed and rejected candidates are not shown here.</p>
               </Panel>
               <Panel title="Recent Activity">
-                <Table head={['Client', 'Update', 'Date']} rows={s.activity.filter(a => a.text).slice(0, 7).map(a => [a.client || '—', a.text, String(a.at).slice(0, 10)])} empty="No activity yet — add or import records and the latest changes appear here." />
+                <Timeline items={s.activity.filter(a => a.text).slice(0, 6).map(a => ({ title: a.text, sub: `${a.client ? a.client + ' · ' : ''}${String(a.at).slice(0, 10)}` }))} empty="No activity yet — add or import records and the latest changes appear here." />
               </Panel>
             </div>
             <Panel title="Pending Actions">
-              <Table head={['Pending action', 'Assigned to', 'Count']} rows={computeAlerts(s).slice(0, 6).map(a => [a.action, a.assigned, a.count])} empty="Nothing pending." />
+              {computeAlerts(s).length === 0 ? <div className="empty">Nothing pending.</div> : <div className="action-list">{computeAlerts(s).slice(0, 6).map(a => <div key={a.id} className="action-item"><Icon name="alert" size={17} /><span>{a.action}<span className="muted"> · {a.assigned}</span></span><span className="n">{a.count}</span></div>)}</div>}
             </Panel>
           </>
         );
@@ -49,7 +57,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         const m = M.domestic(s);
         return (
           <>
-            <Cards><Metric label="Enquiries" value={m.enquiries} sub="Cases" /><Metric label="Profiles Shared" value={m.profilesShared} sub="Profiles stage or later" /><Metric label="Visa Cases" value={m.visaCases} sub="Visa & Travel" /><Metric label="Handovers" value={m.handovers} sub="Arrival / guarantee" /></Cards>
+            <Cards><Metric label="Enquiries" value={m.enquiries} sub="Sponsor cases" icon="domestic" /><Metric label="Profiles Shared" value={m.profilesShared} sub="Profiles stage or later" icon="candidates" tone="info" /><Metric label="Visa Cases" value={m.visaCases} sub="Visa & Travel" icon="visas" tone="gold" /><Metric label="Handovers" value={m.handovers} sub="Arrival / guarantee" icon="warranty" tone="ok" /></Cards>
             <Panel title="Domestic Worker Journey"><Flow items={C.domesticStatuses} /></Panel>
           </>
         );
@@ -59,7 +67,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         const o = await overview(ws, user.role, user.userId);
         return (
           <>
-            <Cards cols={3}><Metric label="Open Vacancies" value={o.openVacancies} sub="Companies hiring" /><Metric label="Candidates" value={o.corporateCandidates} sub="Local and overseas" /><Metric label="Placement fees" value={o.money ? money(o.money.placementOut) : 'Management only'} sub="Outstanding" /></Cards>
+            <Cards cols={3}><Metric label="Open Vacancies" value={o.openVacancies} sub="Companies hiring" icon="corporate" /><Metric label="Candidates" value={o.corporateCandidates} sub="Local and overseas" icon="candidates" tone="info" /><Metric label="Placement fees" value={o.money ? money(o.money.placementOut) : 'Management only'} sub="Outstanding" icon="fees" tone="gold" /></Cards>
             <Panel title="Corporate Journey"><Flow items={['Company Vacancy', 'Candidate Sourcing', 'Interview', 'Offer', 'Confirmed Joining', 'Placement Fee']} /></Panel>
             <p><Link href="/corporate" className="btn secondary">Open Corporate Recruitment</Link></p>
           </>
@@ -68,7 +76,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
       {tab === 'overview' && (async () => {
         const o = await overview(ws, user.role, user.userId);
-        const K = ({ label, value, sub, href }: { label: string; value: React.ReactNode; sub: string; href: string }) => <Link href={href} className="card" style={{ textDecoration: 'none', color: 'inherit' }}><div className="muted">{label}</div><div className="num">{value}</div><div className="muted">{sub} →</div></Link>;
+        const K = ({ label, value, sub, href }: { label: string; value: React.ReactNode; sub: string; href: string }) => <Link href={href} className="card" style={{ textDecoration: 'none', color: 'inherit' }}><span className="ico"><Icon name={href.split('?')[0].replace(/^\//, '') || 'dashboard'} size={20} /></span><div className="muted">{label}</div><div className="num">{value}</div><div className="muted">{sub} →</div></Link>;
         const m = o.money;
         return (
           <>

@@ -1,5 +1,6 @@
 /** Presentation helpers in V6's visual vocabulary (server-safe: no state, no browser APIs). React escapes all text. */
 import type { ReactNode } from 'react';
+import Icon from './icons';
 
 export function badgeClass(s: string): string {
   if (/rejected|expired|overdue|escalate|within 7/i.test(s)) return 'red';
@@ -17,8 +18,8 @@ export function Heading({ title, desc, actions }: { title: string; desc: string;
     </div>
   );
 }
-export const Metric = ({ label, value, sub }: { label: string; value: ReactNode; sub: string }) => (
-  <div className="card"><div className="muted">{label}</div><div className="num">{value}</div><div className="muted">{sub}</div></div>
+export const Metric = ({ label, value, sub, icon, tone }: { label: string; value: ReactNode; sub: string; icon?: string; tone?: 'gold' | 'ok' | 'info' | 'warn' }) => (
+  <div className={`card ${tone ? 'tone-' + tone : ''}`}>{icon && <span className="ico"><Icon name={icon} size={20} /></span>}<div className="muted">{label}</div><div className="num">{value}</div><div className="muted">{sub}</div></div>
 );
 export const Cards = ({ children, cols }: { children: ReactNode; cols?: number }) => (
   <div className="cards" style={cols ? { gridTemplateColumns: `repeat(${cols},minmax(0,1fr))` } : undefined}>{children}</div>
@@ -46,3 +47,24 @@ export const Table = ({ head, rows, empty }: { head: string[]; rows: ReactNode[]
     <div className="scroll-x"><table><thead><tr>{head.map((h, i) => <th key={i}>{h}</th>)}</tr></thead>
       <tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j}>{c}</td>)}</tr>)}</tbody></table></div>
   );
+
+export const CHART_COLORS = ['#0d6b66', '#c4902a', '#2b6cb0', '#1c8a58', '#b53a3a', '#7a5ea8'];
+/** Donut chart (pure SVG) with a legend. Segments are drawn from the values; empty data shows a grey ring. */
+export function Donut({ data, size = 168, thickness = 24, centre }: { data: { label: string; value: number; color?: string }[]; size?: number; thickness?: number; centre?: { value: ReactNode; label: string } }) {
+  const total = data.reduce((a, d) => a + d.value, 0), r = (size - thickness) / 2, c = 2 * Math.PI * r;
+  let offset = 0;
+  return (
+    <div className="donut-wrap">
+      <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label="Chart">
+          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#eeeae0" strokeWidth={thickness} />
+          {total > 0 && data.map((d, i) => { const len = (d.value / total) * c, el = <circle key={d.label} cx={size / 2} cy={size / 2} r={r} fill="none" stroke={d.color ?? CHART_COLORS[i % CHART_COLORS.length]} strokeWidth={thickness} strokeDasharray={`${Math.max(0, len - 3)} ${c}`} strokeDashoffset={-offset} transform={`rotate(-90 ${size / 2} ${size / 2})`} strokeLinecap="butt" />; offset += len; return el; })}
+        </svg>
+        {centre && <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}><div style={{ fontSize: 28, fontWeight: 750, letterSpacing: '-.02em' }}>{centre.value}</div><div className="muted">{centre.label}</div></div>}
+      </div>
+      <div className="donut-legend">{data.map((d, i) => <div key={d.label}><i style={{ background: d.color ?? CHART_COLORS[i % CHART_COLORS.length] }} />{d.label}<b>{d.value}</b></div>)}</div>
+    </div>
+  );
+}
+export const Timeline = ({ items, empty }: { items: { title: string; sub: string }[]; empty?: string }) =>
+  items.length === 0 ? <div className="empty">{empty ?? 'Nothing yet.'}</div> : <ul className="timeline">{items.map((x, i) => <li key={i}><span className="dot" /><div><b>{x.title}</b><span>{x.sub}</span></div></li>)}</ul>;
