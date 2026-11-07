@@ -6,7 +6,7 @@ import { loadMatrix } from '@/lib/repo/access';
 import { logoutAction } from '@/app/login/actions';
 import { requireUser } from '@/lib/auth/dal';
 import { can, roleLabel } from '@/lib/config';
-import Sidebar from '@/components/Sidebar';
+import TopNav from '@/components/TopNav';
 import WorkspaceSwitch from '@/components/WorkspaceSwitch';
 import { ToastProvider } from '@/components/Toaster';
 import ReportsToolbar from '@/components/ReportsToolbar';
@@ -27,22 +27,14 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const perms = ['finance.view', 'contracts.view'].filter(p => can(user.role, p));
   return (
     <ToastProvider>
-      <div className="shell">
-        <aside>
-          <div className="brand"><div className="logo"><Icon name="agencies" size={22} /></div><div><strong>LEADS GLOBAL</strong><small>MANPOWER · QATAR</small></div></div>
-          <Sidebar perms={perms} hidden={hidden} />
-          <div className="foot">{ws === 'demo' ? 'Demo workspace · fictional data' : 'Live workspace'}<br />Recruitment Operations Platform</div>
-        </aside>
+      <div className="app">
+        <TopNav perms={perms} hidden={hidden} right={<>
+          <WorkspaceSwitch ws={ws} canSwitch={can(user.role, 'workspace.switch')} />
+          <span className="avatar" aria-hidden="true">{user.name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()}</span>
+          <span className="who-text"><b>{user.name}</b><span>{roleLabel(user.role)}</span></span>
+          <form action={logoutAction}><button className="btn ghost small" type="submit" title="Sign out"><Icon name="logout" size={14} /> Sign out</button></form>
+        </>} />
         <main>
-          <header>
-            <div><strong>Leads Global Manpower</strong><div className="muted">Recruitment Operations Platform · Qatar</div></div>
-            <div className="who">
-              <WorkspaceSwitch ws={ws} canSwitch={can(user.role, 'workspace.switch')} />
-              <span className="avatar" aria-hidden="true">{user.name.split(/s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()}</span>
-              <span className="who-text"><b>{user.name}</b><span>{roleLabel(user.role)}</span></span>
-              <form action={logoutAction}><button className="btn ghost small" type="submit">Sign out</button></form>
-            </div>
-          </header>
           <div className={`banner ${ws === 'demo' ? 'demo' : 'live'}`}>
             {ws === 'demo' ? 'DEMO WORKSPACE — fictional sample data only. Not business data.' : 'LIVE WORKSPACE — real business records. Changes are saved to the database and logged.'}
           </div>

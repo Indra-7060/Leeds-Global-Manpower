@@ -20,7 +20,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
     <>
       <section className="hero">
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <div className="eyebrow" style={{ color: 'rgba(255,255,255,.75)' }}>Management dashboard</div>
+          <div className="eyebrow">Management dashboard</div>
           <h1>{user.name === roleLabel(user.role) ? 'Welcome back' : `Welcome back, ${user.name.split(' ')[0]}`}</h1>
           <p>Orders, candidates, visas and money across Blue-Collar, Domestic and Corporate recruitment — {new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())}.</p>
         </div>
@@ -34,8 +34,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         return (
           <>
             <Cards>
-              <Metric label="Open Orders" value={m.openOrders} sub="Across active clients" icon="orders" /><Metric label="CVs Received" value={m.cvsReceived.toLocaleString('en-US')} sub="Candidate records" icon="candidates" tone="info" />
-              <Metric label="Visa Pipeline" value={m.visaPipeline} sub="Across visa stages" icon="visas" tone="gold" /><Metric label="Ready to Fly" value={m.readyToFly} sub="Deployment queue" icon="deployment" tone="ok" />
+              <Metric label="Open Orders" value={m.openOrders} sub="Across active clients" icon="orders" solid="teal" /><Metric label="CVs Received" value={m.cvsReceived.toLocaleString('en-US')} sub="Candidate records" icon="candidates" solid="ink" />
+              <Metric label="Visa Pipeline" value={m.visaPipeline} sub="Across visa stages" icon="visas" solid="gold" /><Metric label="Ready to Fly" value={m.readyToFly} sub="Deployment queue" icon="deployment" solid="sage" />
             </Cards>
             <div className="split">
               <Panel title="Live Recruitment Pipeline">

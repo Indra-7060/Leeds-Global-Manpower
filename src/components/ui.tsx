@@ -12,14 +12,14 @@ export const Badge = ({ text }: { text: string }) => <span className={`pill ${ba
 
 export function Heading({ title, desc, actions }: { title: string; desc: string; actions?: ReactNode }) {
   return (
-    <div className="row between">
-      <div><div className="eyebrow">LGM / {title}</div><h1 className="title">{title}</h1><div className="muted">{desc}</div></div>
+    <div className="page-head">
+      <div><div className="eyebrow">{title}</div><h1 className="title">{title}</h1><div className="muted">{desc}</div></div>
       {actions && <div className="row panel-actions">{actions}</div>}
     </div>
   );
 }
-export const Metric = ({ label, value, sub, icon, tone }: { label: string; value: ReactNode; sub: string; icon?: string; tone?: 'gold' | 'ok' | 'info' | 'warn' }) => (
-  <div className={`card ${tone ? 'tone-' + tone : ''}`}>{icon && <span className="ico"><Icon name={icon} size={20} /></span>}<div className="muted">{label}</div><div className="num">{value}</div><div className="muted">{sub}</div></div>
+export const Metric = ({ label, value, sub, icon, tone, solid }: { label: string; value: ReactNode; sub: string; icon?: string; tone?: 'gold' | 'ok' | 'info' | 'warn'; solid?: 'teal' | 'ink' | 'gold' | 'sage' }) => (
+  <div className={`card ${tone ? 'tone-' + tone : ''} ${solid ? 'solid-' + solid : ''}`}>{icon && <span className="ico"><Icon name={icon} size={20} /></span>}<div className="muted">{label}</div><div className="num">{value}</div><div className="muted">{sub}</div></div>
 );
 export const Cards = ({ children, cols }: { children: ReactNode; cols?: number }) => (
   <div className="cards" style={cols ? { gridTemplateColumns: `repeat(${cols},minmax(0,1fr))` } : undefined}>{children}</div>
