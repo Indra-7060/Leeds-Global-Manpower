@@ -30,5 +30,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "Leads_Global_ERP_Final", "Reusable_ERP_Master_Template", "ERP_Analysis_And_Documentation"]
 }

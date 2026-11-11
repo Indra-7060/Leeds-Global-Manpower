@@ -1,0 +1,207 @@
+{
+  "ranAt": "2026-11-11T15:38:38.383Z",
+  "total": 40,
+  "passed": 40,
+  "results": [
+    {
+      "group": "A. Core is generic",
+      "name": "core files contain no Leads Global or recruitment-division wording",
+      "ok": true
+    },
+    {
+      "group": "A. Core is generic",
+      "name": "the Leads Global project's core copy is byte-identical to this template's core",
+      "ok": true
+    },
+    {
+      "group": "A. Core is generic",
+      "name": "no project-specific file is needed by the core (core loads with no project present)",
+      "ok": true
+    },
+    {
+      "group": "B. Two example configurations are independent",
+      "name": "different project ids, names, storage keys and currencies",
+      "ok": true
+    },
+    {
+      "group": "B. Two example configurations are independent",
+      "name": "different tables",
+      "ok": true
+    },
+    {
+      "group": "B. Two example configurations are independent",
+      "name": "different menus, dashboards and reports",
+      "ok": true
+    },
+    {
+      "group": "B. Two example configurations are independent",
+      "name": "different statuses / stages",
+      "ok": true
+    },
+    {
+      "group": "B. Two example configurations are independent",
+      "name": "one example has divisions (two pipelines), the other has none — same core handles both",
+      "ok": true
+    },
+    {
+      "group": "B. Two example configurations are independent",
+      "name": "field sets are different for the same scope concept (B2B vs B2C)",
+      "ok": true
+    },
+    {
+      "group": "B. Two example configurations are independent",
+      "name": "no table name or field of one example leaks into the other",
+      "ok": true
+    },
+    {
+      "group": "C. Independent data",
+      "name": "writing to one project never changes the other (separate stores, same process)",
+      "ok": true
+    },
+    {
+      "group": "C. Independent data",
+      "name": "browser storage keys keep data apart (localStorage shim)",
+      "ok": true
+    },
+    {
+      "group": "C. Independent data",
+      "name": "a backup of one project cannot be restored into the other, in either direction",
+      "ok": true
+    },
+    {
+      "group": "C. Independent data",
+      "name": "each project's own backup round-trips",
+      "ok": true
+    },
+    {
+      "group": "C. Independent data",
+      "name": "record ids are per project and per table (both start at 1)",
+      "ok": true
+    },
+    {
+      "group": "D. Manpower Recruitment example — its own workflow",
+      "name": "demo data loads through validation",
+      "ok": true
+    },
+    {
+      "group": "D. Manpower Recruitment example — its own workflow",
+      "name": "interview Passed moves the candidate to Interviewed; Failed rejects; stages never move backwards",
+      "ok": true
+    },
+    {
+      "group": "D. Manpower Recruitment example — its own workflow",
+      "name": "a future interview cannot already be Passed",
+      "ok": true
+    },
+    {
+      "group": "D. Manpower Recruitment example — its own workflow",
+      "name": "placement marks the candidate Placed, fills the vacancy, and the fee = salary × 12 × %",
+      "ok": true
+    },
+    {
+      "group": "D. Manpower Recruitment example — its own workflow",
+      "name": "a closed vacancy cannot receive a placement; a candidate can only be placed once",
+      "ok": true
+    },
+    {
+      "group": "D. Manpower Recruitment example — its own workflow",
+      "name": "dashboard counters follow the data",
+      "ok": true
+    },
+    {
+      "group": "D. Manpower Recruitment example — its own workflow",
+      "name": "delete protection: an employer with vacancies cannot be deleted",
+      "ok": true
+    },
+    {
+      "group": "E. CRM / Lead Management example — its own workflow",
+      "name": "demo data loads through validation and activities move the leads",
+      "ok": true
+    },
+    {
+      "group": "E. CRM / Lead Management example — its own workflow",
+      "name": "pipelines are separate: a B2C lead cannot be moved to a B2B-only stage",
+      "ok": true
+    },
+    {
+      "group": "E. CRM / Lead Management example — its own workflow",
+      "name": "Lost needs a reason; Won stamps the close date; reopening clears it",
+      "ok": true
+    },
+    {
+      "group": "E. CRM / Lead Management example — its own workflow",
+      "name": "a won B2B deal needs a deal value",
+      "ok": true
+    },
+    {
+      "group": "E. CRM / Lead Management example — its own workflow",
+      "name": "contact must work for the lead's company",
+      "ok": true
+    },
+    {
+      "group": "E. CRM / Lead Management example — its own workflow",
+      "name": "pipeline value, weighted forecast, won value and win rate are exact",
+      "ok": true
+    },
+    {
+      "group": "E. CRM / Lead Management example — its own workflow",
+      "name": "B2B and B2C counters never mix",
+      "ok": true
+    },
+    {
+      "group": "E. CRM / Lead Management example — its own workflow",
+      "name": "next steps: only the latest activity of an open lead counts; overdue is flagged",
+      "ok": true
+    },
+    {
+      "group": "E. CRM / Lead Management example — its own workflow",
+      "name": "CSV import works in a scoped example (rows go to the chosen pipeline)",
+      "ok": true
+    },
+    {
+      "group": "E. CRM / Lead Management example — its own workflow",
+      "name": "CSV import works in the scope-less example",
+      "ok": true
+    },
+    {
+      "group": "F. Blank starter + configuration sanity",
+      "name": "the blank project boots, validates and round-trips",
+      "ok": true
+    },
+    {
+      "group": "F. Blank starter + configuration sanity",
+      "name": "manpower: every field is well-formed and every ref / column / filter / nav target exists",
+      "ok": true
+    },
+    {
+      "group": "F. Blank starter + configuration sanity",
+      "name": "manpower: every dashboard card is a function of the data",
+      "ok": true
+    },
+    {
+      "group": "F. Blank starter + configuration sanity",
+      "name": "crm: every field is well-formed and every ref / column / filter / nav target exists",
+      "ok": true
+    },
+    {
+      "group": "F. Blank starter + configuration sanity",
+      "name": "crm: every dashboard card is a function of the data",
+      "ok": true
+    },
+    {
+      "group": "F. Blank starter + configuration sanity",
+      "name": "blank: every field is well-formed and every ref / column / filter / nav target exists",
+      "ok": true
+    },
+    {
+      "group": "F. Blank starter + configuration sanity",
+      "name": "blank: every dashboard card is a function of the data",
+      "ok": true
+    },
+    {
+      "group": "F. Blank starter + configuration sanity",
+      "name": "every report of both examples runs on seeded data and on empty data without error",
+      "ok": true
+    }
+  ]
+}

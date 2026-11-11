@@ -1,0 +1,472 @@
+{
+  "ranAt": "2026-11-11T15:38:37.823Z",
+  "total": 93,
+  "passed": 93,
+  "results": [
+    {
+      "group": "A. Core data rules",
+      "name": "IDs are sequential per table and prefixed",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "required field is rejected with a clear message",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "number, date and e-mail fields are validated",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "select values outside the allowed list are rejected",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "duplicate client name is blocked inside a division, allowed in another",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "duplicate passport is blocked; blank passport is not a duplicate",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "references must point to existing records",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "a record cannot reference a record of another division",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "division can never be changed after creation",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "delete is blocked while other records depend on the record",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "unused record can be deleted and the audit log records it",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "every create / update writes an audit entry",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "tracked fields keep a history (from → to)",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "failed batch leaves no half-written data",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "simulate() rolls everything back (import preview safety)",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "records survive reopening (storage adapter round trip)",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "when browser storage is full the save fails loudly, nothing is half-saved, and saving works again afterwards",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "the \"ever reached\" cache is never stale after a restore",
+      "ok": true
+    },
+    {
+      "group": "A. Core data rules",
+      "name": "unreadable stored data is refused, never silently overwritten",
+      "ok": true
+    },
+    {
+      "group": "B. Blue-Collar workflow (daily update → stage → deployment → agency ledger)",
+      "name": "stage list for Blue-Collar contains no Corporate/Domestic-only stage",
+      "ok": true
+    },
+    {
+      "group": "B. Blue-Collar workflow (daily update → stage → deployment → agency ledger)",
+      "name": "a daily update changes the candidate stage and writes stage history",
+      "ok": true
+    },
+    {
+      "group": "B. Blue-Collar workflow (daily update → stage → deployment → agency ledger)",
+      "name": "milestone date is filled from the update date, and never overwritten",
+      "ok": true
+    },
+    {
+      "group": "B. Blue-Collar workflow (daily update → stage → deployment → agency ledger)",
+      "name": "Deployed update records the verified deployment date",
+      "ok": true
+    },
+    {
+      "group": "B. Blue-Collar workflow (daily update → stage → deployment → agency ledger)",
+      "name": "a stage that does not belong to the division workflow is rejected",
+      "ok": true
+    },
+    {
+      "group": "B. Blue-Collar workflow (daily update → stage → deployment → agency ledger)",
+      "name": "moving a candidate backwards, or out of Rejected, is allowed but warned; skipping stages is allowed silently",
+      "ok": true
+    },
+    {
+      "group": "B. Blue-Collar workflow (daily update → stage → deployment → agency ledger)",
+      "name": "an update whose client does not match the candidate is rejected",
+      "ok": true
+    },
+    {
+      "group": "B. Blue-Collar workflow (daily update → stage → deployment → agency ledger)",
+      "name": "follow-up due date before the update date is rejected; due date needs a follow-up text",
+      "ok": true
+    },
+    {
+      "group": "B. Blue-Collar workflow (daily update → stage → deployment → agency ledger)",
+      "name": "a Domestic candidate cannot be updated from the Blue-Collar division",
+      "ok": true
+    },
+    {
+      "group": "B. Blue-Collar workflow (daily update → stage → deployment → agency ledger)",
+      "name": "agency earned = verified-deployed workers × fee (and ONLY verified deployments)",
+      "ok": true
+    },
+    {
+      "group": "B. Blue-Collar workflow (daily update → stage → deployment → agency ledger)",
+      "name": "payments linked to the allocation reduce the outstanding amount; unlinked ones are listed apart",
+      "ok": true
+    },
+    {
+      "group": "B. Blue-Collar workflow (daily update → stage → deployment → agency ledger)",
+      "name": "deployments above the allocated quantity are flagged",
+      "ok": true
+    },
+    {
+      "group": "B. Blue-Collar workflow (daily update → stage → deployment → agency ledger)",
+      "name": "an allocation must belong to the same client/agency as the payment",
+      "ok": true
+    },
+    {
+      "group": "B. Blue-Collar workflow (daily update → stage → deployment → agency ledger)",
+      "name": "an agency can only be allocated once per order",
+      "ok": true
+    },
+    {
+      "group": "B. Blue-Collar workflow (daily update → stage → deployment → agency ledger)",
+      "name": "\"ever reached\" keeps counting a candidate who has moved on; \"current\" does not",
+      "ok": true
+    },
+    {
+      "group": "B. Blue-Collar workflow (daily update → stage → deployment → agency ledger)",
+      "name": "the latest update defines the open follow-up; older ones are superseded",
+      "ok": true
+    },
+    {
+      "group": "B. Blue-Collar workflow (daily update → stage → deployment → agency ledger)",
+      "name": "order fulfilment counts verified deployments",
+      "ok": true
+    },
+    {
+      "group": "C. Domestic warranty (9 months)",
+      "name": "date arithmetic: calendar months with end-of-month clamp and leap years",
+      "ok": true
+    },
+    {
+      "group": "C. Domestic warranty (9 months)",
+      "name": "sponsor handover update auto-creates a warranty: start = handover date, end = +9 months",
+      "ok": true
+    },
+    {
+      "group": "C. Domestic warranty (9 months)",
+      "name": "the warranty runs from the verified sponsor handover date, not from any other date (arrival, ticket, today)",
+      "ok": true
+    },
+    {
+      "group": "C. Domestic warranty (9 months)",
+      "name": "no warranty is created before the sponsor handover",
+      "ok": true
+    },
+    {
+      "group": "C. Domestic warranty (9 months)",
+      "name": "warranty state: active / last day / expired are exact",
+      "ok": true
+    },
+    {
+      "group": "C. Domestic warranty (9 months)",
+      "name": "editing start date or months recalculates the expiry automatically",
+      "ok": true
+    },
+    {
+      "group": "C. Domestic warranty (9 months)",
+      "name": "a manually typed expiry date is ignored — expiry is always calculated",
+      "ok": true
+    },
+    {
+      "group": "C. Domestic warranty (9 months)",
+      "name": "start differing from the recorded handover date is flagged for the client to confirm (not silently changed)",
+      "ok": true
+    },
+    {
+      "group": "C. Domestic warranty (9 months)",
+      "name": "open complaint → resolved; counters follow",
+      "ok": true
+    },
+    {
+      "group": "C. Domestic warranty (9 months)",
+      "name": "complaint date before the warranty start, or resolved before complaint, is rejected",
+      "ok": true
+    },
+    {
+      "group": "C. Domestic warranty (9 months)",
+      "name": "replacement worker must be a different worker of the same sponsor",
+      "ok": true
+    },
+    {
+      "group": "C. Domestic warranty (9 months)",
+      "name": "only one warranty per worker",
+      "ok": true
+    },
+    {
+      "group": "C. Domestic warranty (9 months)",
+      "name": "refund amount without a refund claim type produces a warning",
+      "ok": true
+    },
+    {
+      "group": "C. Domestic warranty (9 months)",
+      "name": "warranty belongs to Domestic workers only",
+      "ok": true
+    },
+    {
+      "group": "C. Domestic warranty (9 months)",
+      "name": "Domestic workflow rejects Blue-Collar-only and Corporate-only stages",
+      "ok": true
+    },
+    {
+      "group": "C. Domestic warranty (9 months)",
+      "name": "worker without a Domestic order field set uses Domestic fields (category list, no agency)",
+      "ok": true
+    },
+    {
+      "group": "D. Corporate workflow and placement fees",
+      "name": "Corporate stage list is Candidate → Interview → Selection → Offer → Joining (no visa/ticket stages)",
+      "ok": true
+    },
+    {
+      "group": "D. Corporate workflow and placement fees",
+      "name": "Joined update records the joining date",
+      "ok": true
+    },
+    {
+      "group": "D. Corporate workflow and placement fees",
+      "name": "fee basis: 1 month, 0.5 month and custom amount",
+      "ok": true
+    },
+    {
+      "group": "D. Corporate workflow and placement fees",
+      "name": "custom fee amount is required when the basis is Custom",
+      "ok": true
+    },
+    {
+      "group": "D. Corporate workflow and placement fees",
+      "name": "fee falls back to the order salary when the candidate has none; missing basis is reported",
+      "ok": true
+    },
+    {
+      "group": "D. Corporate workflow and placement fees",
+      "name": "receivables: due = joining + invoice months; received reduces outstanding; overdue flagged",
+      "ok": true
+    },
+    {
+      "group": "D. Corporate workflow and placement fees",
+      "name": "only Joined candidates appear in placement fees",
+      "ok": true
+    },
+    {
+      "group": "E. Division isolation (no mixing)",
+      "name": "each division has its own stage vocabulary and only its own fields",
+      "ok": true
+    },
+    {
+      "group": "E. Division isolation (no mixing)",
+      "name": "seeded dashboards count each division separately and add up to the global total",
+      "ok": true
+    },
+    {
+      "group": "E. Division isolation (no mixing)",
+      "name": "Blue-Collar agency ledger never includes Domestic or Corporate records",
+      "ok": true
+    },
+    {
+      "group": "E. Division isolation (no mixing)",
+      "name": "a candidate of one division cannot appear in another division's documents / interviews",
+      "ok": true
+    },
+    {
+      "group": "E. Division isolation (no mixing)",
+      "name": "Corporate has no ticket fields and Domestic warranty differs from the generic one",
+      "ok": true
+    },
+    {
+      "group": "F. CSV import / export",
+      "name": "template contains the field keys of the chosen division only",
+      "ok": true
+    },
+    {
+      "group": "F. CSV import / export",
+      "name": "CSV parser handles quotes, commas, embedded newlines and BOM",
+      "ok": true
+    },
+    {
+      "group": "F. CSV import / export",
+      "name": "preview classifies rows as new / duplicate / invalid with reasons, and writes nothing",
+      "ok": true
+    },
+    {
+      "group": "F. CSV import / export",
+      "name": "commit adds only valid rows, atomically, with audit entry",
+      "ok": true
+    },
+    {
+      "group": "F. CSV import / export",
+      "name": "linked columns accept the record name or id; unknown names are rejected",
+      "ok": true
+    },
+    {
+      "group": "F. CSV import / export",
+      "name": "imported rows go to the chosen division only and respect its field set",
+      "ok": true
+    },
+    {
+      "group": "F. CSV import / export",
+      "name": "day-first dates (DD/MM/YYYY) are converted; impossible dates rejected",
+      "ok": true
+    },
+    {
+      "group": "F. CSV import / export",
+      "name": "file with no matching columns is refused; empty file is refused",
+      "ok": true
+    },
+    {
+      "group": "F. CSV import / export",
+      "name": "export neutralises spreadsheet formula injection and round-trips through import",
+      "ok": true
+    },
+    {
+      "group": "F. CSV import / export",
+      "name": "importing the app's own export gives duplicates, not double records",
+      "ok": true
+    },
+    {
+      "group": "G. Backup / restore",
+      "name": "backup → restore into an empty store reproduces every table, counters and history",
+      "ok": true
+    },
+    {
+      "group": "G. Backup / restore",
+      "name": "a backup of another project is rejected and changes nothing",
+      "ok": true
+    },
+    {
+      "group": "G. Backup / restore",
+      "name": "corrupt backups are rejected (not an object, missing data, duplicate ids, wrong list type)",
+      "ok": true
+    },
+    {
+      "group": "G. Backup / restore",
+      "name": "dangling references in a backup are reported as warnings",
+      "ok": true
+    },
+    {
+      "group": "G. Backup / restore",
+      "name": "restore replaces current data (does not merge) and is written to the audit log",
+      "ok": true
+    },
+    {
+      "group": "H. Dashboard traceability (no static numbers)",
+      "name": "every dashboard card value is a function of the data",
+      "ok": true
+    },
+    {
+      "group": "H. Dashboard traceability (no static numbers)",
+      "name": "every counter changes when the underlying data changes",
+      "ok": true
+    },
+    {
+      "group": "H. Dashboard traceability (no static numbers)",
+      "name": "overview totals equal independent counts of the raw tables",
+      "ok": true
+    },
+    {
+      "group": "H. Dashboard traceability (no static numbers)",
+      "name": "stage cards equal the number of candidates currently at that stage",
+      "ok": true
+    },
+    {
+      "group": "H. Dashboard traceability (no static numbers)",
+      "name": "agency totals equal an independent recomputation from candidates and accounts",
+      "ok": true
+    },
+    {
+      "group": "H. Dashboard traceability (no static numbers)",
+      "name": "seeded history proves the stage counters came from daily updates, not typed values",
+      "ok": true
+    },
+    {
+      "group": "H. Dashboard traceability (no static numbers)",
+      "name": "every alert is computed from data (none on an empty database)",
+      "ok": true
+    },
+    {
+      "group": "H. Dashboard traceability (no static numbers)",
+      "name": "every report returns rows consistent with its column keys",
+      "ok": true
+    },
+    {
+      "group": "H. Dashboard traceability (no static numbers)",
+      "name": "the counters left at 0 by the demo data react when their situation is created",
+      "ok": true
+    },
+    {
+      "group": "I. Configuration sanity",
+      "name": "every field of every division is well-formed (key, label, known type, refs exist)",
+      "ok": true
+    },
+    {
+      "group": "I. Configuration sanity",
+      "name": "no duplicate field keys inside one field set",
+      "ok": true
+    },
+    {
+      "group": "I. Configuration sanity",
+      "name": "every table column and filter points to a real field or computed column",
+      "ok": true
+    },
+    {
+      "group": "I. Configuration sanity",
+      "name": "every navigation item resolves to a table or report that exists",
+      "ok": true
+    },
+    {
+      "group": "I. Configuration sanity",
+      "name": "the core scripts contain no Leads Global / recruitment wording",
+      "ok": true
+    }
+  ]
+}

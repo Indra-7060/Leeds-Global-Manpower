@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reusable ERP Master Template</title>
+<style>
+  body { font: 15px/1.5 "Segoe UI", system-ui, Arial, sans-serif; margin: 0; background: #f3f6fb; color: #172d49; }
+  main { max-width: 860px; margin: 0 auto; padding: 36px 18px; }
+  h1 { margin: 0 0 6px; } p { color: #4d6580; }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin: 22px 0; }
+  a.card { display: block; background: #fff; border: 1px solid #dce4ef; border-left: 5px solid var(--c); border-radius: 12px; padding: 16px; text-decoration: none; color: inherit; }
+  a.card:hover { box-shadow: 0 6px 22px #1b2f4a22; } a.card b { color: var(--c); font-size: 17px; } a.card span { display: block; margin-top: 6px; color: #5a6f87; font-size: 13px; }
+  code { background: #e7eef7; padding: 1px 6px; border-radius: 5px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Reusable ERP Master Template</h1>
+  <p>One generic core (<code>core/</code>) and three small files per project: <code>logic.js</code> (business rules), <code>config.js</code> (tables, fields, menus, dashboard) and <code>seed.js</code> (fictional demo data). Each example below runs on exactly the same core and keeps its own settings and its own data.</p>
+  <div class="grid">
+    <a class="card" style="--c:#0d8a80" href="projects/manpower/index.html"><b>Manpower Recruitment ERP</b><span>Example 1 — one workspace, 7 candidate stages, interviews move candidates, placements fill vacancies and earn fees.</span></a>
+    <a class="card" style="--c:#5b4bb7" href="projects/crm/index.html"><b>CRM / Lead Management ERP</b><span>Example 2 — two pipelines (B2B, B2C), activities move leads, weighted forecast and win rate.</span></a>
+    <a class="card" style="--c:#1766ac" href="projects/_blank/index.html"><b>Blank starter project</b><span>The smallest working project. Copy the folder to begin a new ERP.</span></a>
+  </div>
+  <p>Data is saved in this browser only (demo storage). See <code>REUSABLE_FRAMEWORK_DOCUMENTATION.md</code>, <code>PROJECT_SETUP_GUIDE.md</code> and <code>CUSTOMIZATION_GUIDE.md</code>.</p>
+</main>
+</body>
+</html>

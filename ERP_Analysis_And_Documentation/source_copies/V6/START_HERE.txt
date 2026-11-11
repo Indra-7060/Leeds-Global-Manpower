@@ -1,0 +1,9 @@
+LEADS GLOBAL ERP V6 — BROWSER DEMO
+
+1. Extract the ZIP.
+2. Open index.html in Chrome.
+3. Click Recruitment to expand three divisions.
+4. Visit Interviews, Visa/QVC, Deployment and use the report buttons.
+5. CSV reports open in Excel. Import .xlsx or .csv via the Excel Import Center.
+
+IMPORTANT: This is an offline browser prototype with illustrative data. It is not a secure production ERP. The role selector is demonstration only, not authentication. Do not enter real passports, private financial data or sensitive candidate records.

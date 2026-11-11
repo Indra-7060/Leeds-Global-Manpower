@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Leads Global ERP — Final Documentation (Short Guide)</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 16mm 15mm; }
+  * { box-sizing: border-box; }
+  body { font: 10.5pt/1.45 "Segoe UI", Arial, sans-serif; color: #172d49; margin: 0; }
+  h1 { font-size: 21pt; margin: 0 0 2pt; color: #152b49; }
+  h2 { font-size: 13.5pt; margin: 15pt 0 5pt; color: #155e9f; border-bottom: 1.5pt solid #cfe0f1; padding-bottom: 2pt; page-break-after: avoid; }
+  h3 { font-size: 11pt; margin: 10pt 0 3pt; page-break-after: avoid; }
+  p { margin: 4pt 0; } ul, ol { margin: 4pt 0 4pt 16pt; padding: 0; } li { margin: 1.5pt 0; }
+  .sub { color: #55708d; margin-bottom: 8pt; }
+  .box { border: 1pt solid #e0b84a; background: #fff6dc; padding: 7pt 10pt; border-radius: 5pt; margin: 8pt 0; page-break-inside: avoid; }
+  .info { border-color: #9cc3e6; background: #eaf3fc; }
+  table { width: 100%; border-collapse: collapse; margin: 6pt 0; font-size: 9.5pt; page-break-inside: auto; }
+  th, td { border: 0.8pt solid #cdd9e6; padding: 3.5pt 6pt; text-align: left; vertical-align: top; }
+  th { background: #eef3f9; } tr { page-break-inside: avoid; }
+  .flow { font-size: 9.5pt; background: #f3f6fb; border-left: 3pt solid var(--c, #1766ac); padding: 5pt 8pt; margin: 4pt 0 8pt; page-break-inside: avoid; }
+  code { background: #eef3f9; padding: 0 3pt; border-radius: 2pt; font-size: 9.5pt; }
+  .foot { margin-top: 14pt; font-size: 8.5pt; color: #6a7f95; }
+</style>
+</head>
+<body>
+
+<h1>Leads Global ERP — Final Version</h1>
+<div class="sub">Short guide in simple English · Built from the client's latest reference (V8.7) · Data in this guide is fictional</div>
+
+<div class="box"><b>Important — please read.</b> This is a <b>demonstration</b> that works in one web browser on one computer. The data is saved inside that browser. It is <b>not secure</b>, <b>not shared</b> between people, and has <b>no login or user roles</b>. It can be lost if the browser's data is cleared. Please do not type real passport, QID or bank details into it. Use <i>Download backup</i> often.</div>
+
+<h2>1. What it does</h2>
+<p>The ERP manages recruitment for three divisions. Each division has its own steps, its own forms and its own dashboard. Every number on a dashboard is <b>calculated from the records that were entered</b> — nothing is typed in by hand.</p>
+<p><b>To open it:</b> double-click <code>index.html</code> in the folder <code>Leads_Global_ERP_Final</code>. No installation and no internet are needed.</p>
+
+<h2>2. The three divisions and their workflows</h2>
+<div class="flow" style="--c:#1766ac"><b>Blue-Collar</b><br>Client → Order → Overseas Agency → Agency Allocation → Candidate → Recruitment Stages → Interview → QVC → RTP → Visa → Ticket → Arrival → Deployment → Handover → Accounts</div>
+<div class="flow" style="--c:#2f8f6b"><b>Domestic</b><br>Sponsor → Worker Requirement → Worker Registration → Recruitment Progress → Ticket / Arrival → Sponsor Handover → 9-month Warranty → Complaint / Replacement / Refund</div>
+<div class="flow" style="--c:#7a4fb3"><b>Corporate</b><br>Company → Job Requirement → Candidate → Interview → Selection → Offer → Joining → Placement Fee / Accounts</div>
+<p>The divisions are kept apart. A Domestic worker cannot be given a Blue-Collar stage such as <i>Deployed</i>, and a Blue-Collar record cannot be linked to a Domestic sponsor.</p>
+
+<h2>3. The modules (menu items)</h2>
+<table>
+<tr><th style="width:27%">Module</th><th>What it is for</th></tr>
+<tr><td>Clients / Sponsors / Companies</td><td>Who the work is for. Duplicate names are blocked.</td></tr>
+<tr><td>Orders / Worker Requirements / Job Requirements</td><td>What is needed: trade, number of people, salary, conditions (different fields in each division).</td></tr>
+<tr><td>Overseas Agencies, Agency Allocations <i>(Blue-Collar)</i></td><td>Which agency supplies how many people for which order, and the fee for each deployed worker.</td></tr>
+<tr><td>Candidates / Workers</td><td>The people being recruited, with their current stage and key dates.</td></tr>
+<tr><td>Daily Updates &amp; Follow-ups</td><td>The daily work log. <b>This is how a candidate moves to the next stage.</b></td></tr>
+<tr><td>Interviews · Tickets &amp; Deployment</td><td>Interview results; flight and ticket details.</td></tr>
+<tr><td>Domestic Warranty (9 months)</td><td>Warranty for each handed-over worker, with complaint, replacement and refund tracking.</td></tr>
+<tr><td>Documents</td><td>Upload and download files (PDF, picture, Word) up to 5 MB.</td></tr>
+<tr><td>Accounts &amp; Collections</td><td>Invoices, payments received, expenses, refunds, deposits.</td></tr>
+<tr><td>Reports · Import / Export · Settings &amp; Backup · Audit log</td><td>Live reports, CSV import/export, backup and restore, record of every change.</td></tr>
+</table>
+
+<h2>4. How to enter data</h2>
+<ol>
+<li><b>Choose the division</b> in the left menu.</li>
+<li>Add the <b>client / sponsor / company</b>, then the <b>order</b> (requirement).</li>
+<li>Blue-Collar only: add the <b>agency</b> and an <b>allocation</b> (agency + order + quantity + fee per deployed worker).</li>
+<li>Add the <b>candidates</b>. Each one starts at <i>CV Received</i>.</li>
+<li>Every day, record <b>Daily Updates</b>: pick the candidate, the date, the new stage, who did the work, what was done, and the next follow-up with its due date. The system then <b>moves the candidate</b>, fills the matching date (for example, Deployed fills the <i>verified deployment date</i>), and keeps the full history.</li>
+<li>Add interviews, tickets, documents and payments as they happen.</li>
+</ol>
+<p>The forms check your entries: required fields, valid dates, numbers, links to existing records, and duplicates. Mistakes are shown under the field. A record that other records depend on cannot be deleted.</p>
+
+<h2>5. How statuses and numbers are calculated</h2>
+<table>
+<tr><th style="width:30%">Item</th><th>Rule</th></tr>
+<tr><td>Stage counters</td><td><b>Current</b>: candidates who are at that stage now. <b>(Ever reached)</b>: candidates who were at that stage at any time.</td></tr>
+<tr><td>Verified deployment</td><td>A daily update to <i>Deployed</i> sets the verified deployment date. Only these workers count for agency fees.</td></tr>
+<tr><td>Agency fee earned</td><td>Verified deployed workers × the fee in the allocation.</td></tr>
+<tr><td>Agency fee outstanding</td><td>Earned minus payments linked to that allocation. The system warns if more workers are deployed than were allocated.</td></tr>
+<tr><td>Warranty start</td><td>The sponsor handover date. A daily update to <i>Handed Over</i> records it and <b>creates the warranty automatically</b>.</td></tr>
+<tr><td>Warranty end</td><td>Start + 9 months (calendar months; 31 May + 9 months = 28 February). It is always calculated, never typed.</td></tr>
+<tr><td>Warranty active / expired</td><td>Active while the end date is today or later (the end date is the last covered day). Expired after that. "Expiring soon" = 30 days or less left.</td></tr>
+<tr><td>Open complaint</td><td>A complaint reason is recorded and the claim is not <i>Resolved</i>.</td></tr>
+<tr><td>Corporate placement fee</td><td>0.5 month, 1 month, or a custom amount, using the candidate's salary. Earned when the candidate has <i>Joined</i>. Due date = joining date + the months set on the job requirement. Outstanding = fee − payments received.</td></tr>
+<tr><td>Follow-up</td><td>The next action of a candidate's latest update. It is overdue when its due date has passed.</td></tr>
+</table>
+
+<h2>6. Where the dashboard numbers come from</h2>
+<ul>
+<li><b>Counts</b> (clients, orders, candidates, interviews, tickets, documents): the number of saved records.</li>
+<li><b>Stage cards and the division table</b>: candidates grouped by their current stage; "—" means that stage does not exist in that division.</li>
+<li><b>Money cards</b>: calculated from allocations, verified deployments, placement fees and the payments entered in Accounts.</li>
+<li><b>Warranty cards</b>: calculated from today's date and each warranty's end date and complaint.</li>
+<li><b>Alerts (bell icon)</b>: overdue follow-ups, open complaints, warranties ending soon, overdue fees — all live.</li>
+</ul>
+<p>Click any card to see exactly which records make up the number. (Tested: 34 of 36 clickable cards match their list exactly; the other two are totals of quantities and open the source orders.)</p>
+
+<h2>7. Backup, import and export</h2>
+<ul>
+<li><b>Backup / Restore</b> (Settings): one JSON file with all records, history and uploaded documents. A backup from another project, or a damaged file, is refused.</li>
+<li><b>CSV import</b>: download the template, fill it, upload it. You see a preview first — which rows will be added, which are duplicates, which are rejected and why. Nothing is saved until you confirm.</li>
+<li><b>CSV export</b>: every list and report can be exported.</li>
+</ul>
+
+<h2>8. Major limitations</h2>
+<ul>
+<li>Single browser, single computer; no sharing, no login, no roles, no encryption — <b>not a secure or multi-user system</b>.</li>
+<li>Designed for hundreds of candidates. At about 2,000 candidates the data passes the browser's storage limit (about 5 MB).</li>
+<li>No connection to accounting, e-mail, SMS or government systems. No artificial-intelligence features.</li>
+<li>Tested in Chrome/Edge engines only. Not tested on Safari, Firefox or real phones.</li>
+<li>A real system needs a server database, sign-in, permissions, server-side checks, secure file storage and backups. The code is organised so these can be added (the storage part is separate), but they are <b>not built</b>.</li>
+</ul>
+
+<h2>9. Questions for the client (the system uses a safe default until answered)</h2>
+<ol>
+<li>Which of the 17 stages belong to each division? (A sensible set per division is used now.)</li>
+<li>What exactly makes a deployment "verified"? (A daily update to <i>Deployed</i>.)</li>
+<li>Must the warranty always start on the verified handover date, or can it be set separately? (Handover date by default; any difference is flagged.)</li>
+<li>Is the last day of the warranty still covered? Which claim statuses are allowed? (Yes; Active, Open, Resolved, Expired.)</li>
+<li>Corporate fee: confirm the basis options, when it is earned, and VAT. (Earned at joining; no VAT.)</li>
+<li>Do Domestic or Corporate use overseas agencies? Do Blue-Collar or Corporate have a warranty? (No, as in the reference.)</li>
+<li>Roles and security rules for the real system; old V6 modules (visits, demand letters, credentials, costing) — still needed?</li>
+</ol>
+
+<div class="foot">Full documents: Final Documentation · Module-wise Workflow · Data Flow · Data Dictionary · Testing Report · V6 vs V8.7 Comparison · Reusable Framework · Setup Guide · Customization Guide.</div>
+</body>
+</html>

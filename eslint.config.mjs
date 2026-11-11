@@ -14,6 +14,9 @@ const eslintConfig = defineConfig([
     "src/generated/**",
     "out/**",
     "build/**",
+    "Leads_Global_ERP_Final/**",
+    "Reusable_ERP_Master_Template/**",
+    "ERP_Analysis_And_Documentation/**",
     "next-env.d.ts",
   ]),
 ]);

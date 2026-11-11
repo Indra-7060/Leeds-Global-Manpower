@@ -1,0 +1,2 @@
+/* Example "CRM / Lead Management" theme: indigo. Only colour variables are overridden; layout stays in the core. */
+:root { --navy: #26214f; --navy-2: #332c6b; --navy-3: #4a40a3; --accent: #5b4bb7; --accent-2: #4a3c9e; }
