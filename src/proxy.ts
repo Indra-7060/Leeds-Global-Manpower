@@ -13,4 +13,6 @@ export function proxy(request: NextRequest) {
   return NextResponse.next({ request: { headers } });
 }
 
-export const config = { matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|svg|ico|css|js)$).*)'] };
+// /offline/** = static, no-server demo apps and docs (fictional data, browser-only storage). They never touch the database,
+// so they are served without a session. Everything else stays behind the login gate.
+export const config = { matcher: ['/((?!_next/static|_next/image|favicon.ico|offline/|.*\\.(?:png|jpg|svg|ico|css|js)$).*)'] };
